@@ -32,6 +32,16 @@ const CHANNELS = [
   { ch:  26, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-26.mp4' },
   { ch:  27, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-27.mp4' },
   { ch:  28, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-28.mp4' },
+  { ch:  29, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment', src:'./assets/videos/clip-29.mp4' },
+  { ch:  30, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment', src:'./assets/videos/clip-30.mp4' },
+  { ch:  31, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-31.mp4' },
+  { ch:  32, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-32.mp4' },
+  { ch:  33, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-33.mp4' },
+  { ch:  34, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-34.mp4' },
+  { ch:  35, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom', src:'./assets/videos/clip-35.mp4' },
+  { ch:  36, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom', src:'./assets/videos/clip-36.mp4' },
+  { ch:  37, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight', src:'./assets/videos/clip-37.mp4' },
+  { ch:  38, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight', src:'./assets/videos/clip-38.mp4' },
 ];
 
 const tvScreen = document.getElementById('tvScreen');
