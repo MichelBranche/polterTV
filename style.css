@@ -1,0 +1,401 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap');
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: #0a0806;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Share Tech Mono', monospace;
+  overflow: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(156,124,94,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 80% at 20% 80%, rgba(46,61,79,0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* TV CABINET */
+.tv-wrap {
+  position: relative;
+  z-index: 10;
+  filter: drop-shadow(0 40px 80px rgba(0,0,0,0.9)) drop-shadow(0 0 60px rgba(156,124,94,0.08));
+  animation: tvFloat 6s ease-in-out infinite;
+}
+
+@keyframes tvFloat {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.tv-cabinet {
+  background: linear-gradient(160deg, #3a2e22 0%, #2a2018 40%, #1e1710 100%);
+  border-radius: 28px 28px 24px 24px;
+  padding: 28px 32px 36px;
+  position: relative;
+  border: 2px solid #4a3828;
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,0.08),
+    inset 0 -4px 8px rgba(0,0,0,0.6),
+    0 8px 0 #1a1208,
+    0 12px 0 #140e06;
+}
+
+.tv-cabinet::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: repeating-linear-gradient(
+    92deg,
+    transparent 0px,
+    transparent 18px,
+    rgba(0,0,0,0.06) 18px,
+    rgba(0,0,0,0.06) 19px
+  );
+  pointer-events: none;
+}
+
+/* SCREEN BEZEL */
+.tv-bezel {
+  background: linear-gradient(145deg, #1a1410 0%, #0e0c08 100%);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,0.04),
+    inset 4px 4px 12px rgba(0,0,0,0.8),
+    inset -2px -2px 8px rgba(255,255,255,0.03);
+  position: relative;
+}
+
+/* SCREEN */
+.tv-screen {
+  width: 520px;
+  height: 390px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.tv-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  box-shadow:
+    inset  8px  0   20px rgba(0,0,0,0.35),
+    inset -8px  0   20px rgba(0,0,0,0.35),
+    inset  0    8px 20px rgba(0,0,0,0.25),
+    inset  0   -8px 20px rgba(0,0,0,0.25);
+  pointer-events: none;
+  z-index: 20;
+}
+
+#screen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  position: relative;
+  z-index: 1;
+}
+
+.src-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,0.18) 3px,
+    rgba(0,0,0,0.18) 4px
+  );
+  pointer-events: none;
+  z-index: 15;
+  border-radius: 8px;
+  mix-blend-mode: multiply;
+}
+
+.phosphor-glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 5;
+  transition: box-shadow 1.2s ease;
+}
+
+.screen-glass {
+  position: absolute;
+  top: 6px; left: 8px;
+  width: 45%; height: 30%;
+  background: linear-gradient(135deg,
+    rgba(63, 239, 5, 0.06) 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    transparent 100%
+  );
+  border-radius: 6px 6px 0 0;
+  pointer-events: none;
+  z-index: 25;
+}
+
+/* CONTROLS BAR */
+.tv-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding: 0 4px;
+}
+
+/* INNER PANEL (space under controls for channel buttons) */
+.tv-panel{
+  margin-top: 14px;
+  padding: 14px 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(0,0,0,0.30), rgba(0,0,0,0.12));
+  border: 1px solid rgba(200,191,173,0.10);
+  box-shadow:
+    inset 0 2px 10px rgba(0,0,0,0.60),
+    inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+.tv-brand {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  color: rgba(200,191,173,0.35);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.onair {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: rgba(200,191,173,0.3);
+  letter-spacing: 0.1em;
+}
+
+.knobs {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+/* ── VOLUME BUTTON (retro) ───────────────────────── */
+.vol-btn{
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(200,191,173,0.18);
+  background: rgba(255,255,255,0.03);
+  color: rgba(200,191,173,0.55);
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.55), inset 0 1px 2px rgba(255,255,255,0.06);
+  transition: transform 0.15s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.vol-btn:hover{
+  border-color: rgba(200,191,173,0.40);
+  color: rgba(232,226,217,0.9);
+  transform: translateY(-1px);
+}
+.vol-btn:active{ transform: translateY(1px); }
+
+.knob {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #5a4535, #2a1e14);
+  border: 2px solid #3a2a1c;
+  box-shadow:
+    0 3px 6px rgba(0,0,0,0.6),
+    inset 0 1px 2px rgba(255,255,255,0.1);
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s ease;
+}
+.knob::after {
+  content: '';
+  position: absolute;
+  top: 4px; left: 50%; transform: translateX(-50%);
+  width: 3px; height: 10px;
+  background: rgba(200,191,173,0.5);
+  border-radius: 2px;
+}
+.knob:hover  { transform: rotate(30deg); }
+.knob:active { transform: rotate(60deg); }
+.knob.ch-knob { width: 38px; height: 38px; }
+.knob.ch-knob::after { height: 12px; top: 5px; }
+
+/* ── POWER BUTTON ─────────────────────────────────── */
+.power-btn{
+  width: 30px; height: 30px;
+  border-radius: 999px;
+  border: 1px solid rgba(200,191,173,0.18);
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.10), rgba(0,0,0,0.35));
+  box-shadow: 0 3px 6px rgba(0,0,0,0.55), inset 0 1px 2px rgba(255,255,255,0.08);
+  cursor: pointer;
+  position: relative;
+}
+.power-btn::before{
+  content:'';
+  position:absolute;
+  inset: 8px;
+  border-radius: 999px;
+  border: 2px solid rgba(200,191,173,0.55);
+  border-top-color: transparent;
+}
+.power-btn::after{
+  content:'';
+  position:absolute;
+  width: 2px; height: 9px;
+  left: 50%; top: 5px;
+  transform: translateX(-50%);
+  background: rgba(200,191,173,0.65);
+  border-radius: 2px;
+}
+.power-btn:active{ transform: translateY(1px); }
+
+body.tv-off .power-btn{
+  border-color: rgba(200,191,173,0.10);
+  opacity: 0.7;
+}
+
+.indicator-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.led {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #10c813;
+  box-shadow: 0 0 6px #3ac43f, 0 0 12px rgba(196,137,58,0.5);
+  animation: ledPulse 2s ease-in-out infinite;
+}
+
+@keyframes ledPulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* CHANNEL STRIP */
+.channel-strip {
+  display: flex;
+  gap: 8px;
+  margin-top: 0;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 590px;
+}
+
+.ch-btn {
+  width: 44px; height: 30px;
+  border: 1px solid rgba(200,191,173,0.15);
+  background: rgba(255,255,255,0.03);
+  border-radius: 4px;
+  color: rgba(11, 227, 44, 0.5);
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.ch-btn:hover {
+  border-color: rgba(200,191,173,0.4);
+  color: rgba(232,226,217,0.9);
+  transform: translateY(-1px);
+}
+.ch-btn.active {
+  border-color: var(--ch-color, #c4893a);
+  color: #e8e2d9;
+  box-shadow: 0 0 10px var(--ch-color, #c4893a), inset 0 0 8px rgba(255,255,255,0.05);
+}
+
+/* HINT */
+.hint {
+  margin-top: 16px;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(200,191,173,0.2);
+  text-align: center;
+}
+.subhint {
+  margin-top: 8px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: rgba(200,191,173,0.16);
+  text-align: center;
+}
+
+/* CHANNEL SWITCH ANIMATION */
+.tv-screen.switching #screen {
+  animation: crtSwitch 0.45s ease forwards;
+}
+@keyframes crtSwitch {
+  0%   { transform: scaleY(1);    filter: brightness(1.2); }
+  20%  { transform: scaleY(0.02); filter: brightness(3) blur(1px); }
+  55%  { transform: scaleY(0.02); filter: brightness(0.1); }
+  75%  { transform: scaleY(1.04); filter: brightness(1.4); }
+  90%  { transform: scaleY(0.97); filter: brightness(0.9); }
+  100% { transform: scaleY(1);    filter: brightness(1); }
+}
+
+@media (max-width: 640px) {
+  .tv-screen  { width: 320px; height: 240px; }
+  .tv-cabinet { padding: 16px 18px 22px; }
+  .tv-panel   { padding: 12px 12px 14px; }
+  .ch-btn     { width: 34px; height: 26px; font-size: 14px; }
+  .power-btn  { width: 28px; height: 28px; }
+}
+
+
+/* ── POWER OFF STATE ───────────────────────────────── */
+body.tv-off .led{
+  background: rgba(200,191,173,0.15);
+  box-shadow: none;
+  animation: none;
+  opacity: 0.4;
+}
+body.tv-off .onair{ opacity: 0.25; }
+
+body.tv-off .knob,
+body.tv-off .ch-btn{
+  pointer-events: none;
+}
+body.tv-off .vol-btn{ pointer-events: none; opacity: 0.4; }
+body.tv-off .ch-btn{ opacity: 0.35; }
+
+.tv-screen.off #screen{
+  filter: brightness(0.3);
+}
+.tv-screen.off .scanlines,
+.tv-screen.off .screen-glass{
+  opacity: 0.20;
+}
+.tv-screen.off .phosphor-glow{
+  opacity: 0;
+}

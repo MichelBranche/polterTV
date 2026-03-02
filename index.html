@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>After Sign-Off: Interference</title>
+    <link rel="stylesheet" href="./style.css">
+  </head>
+
+  <body>
+    <div class="tv-wrap">
+      <div class="tv-cabinet">
+        <div class="tv-bezel">
+          <div class="tv-screen" id="tvScreen" tabindex="0" aria-label="TV screen">
+            <canvas id="screen"></canvas>
+            <div class="scanlines"></div>
+            <div class="phosphor-glow" id="glow"></div>
+            <div class="screen-glass"></div>
+
+            <!-- Hidden video element used as a source for the canvas -->
+            <video id="srcVideo" class="src-video" playsinline preload="metadata"></video>
+          </div>
+        </div>
+
+        <div class="tv-controls">
+          <div class="tv-brand">PolterTV</div>
+
+          <div class="indicator-row" aria-hidden="true">
+            <div class="led" id="led"></div>
+            <span class="onair">ON AIR</span>
+          </div>
+
+          <div class="knobs">
+            <button class="power-btn" id="powerBtn" type="button" aria-label="Accendi/Spegni TV" aria-pressed="true" title="Power"></button>
+            <button class="vol-btn" id="volBtn" type="button" aria-label="Volume" title="Volume">VOL</button>
+            <div class="knob" id="prevKnob" title="Canale precedente" aria-label="Canale precedente"></div>
+            <div class="knob ch-knob" id="nextKnob" title="Canale successivo" aria-label="Canale successivo"></div>
+          </div>
+        </div>
+
+        <div class="tv-panel">
+          <div class="channel-strip" id="channelStrip" aria-label="Selettore canali"></div>
+        </div>
+      </div>
+
+      <div class="hint">clic sulla manopola o sui pulsanti per cambiare · funzionano anche spazio/frecce</div>
+      <div class="subhint">metti le clip in <span class="mono">/assets/videos</span> e aggiorna <span class="mono">CHANNELS</span> in <span class="mono">script.js</span></div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
