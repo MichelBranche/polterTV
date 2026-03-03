@@ -2,46 +2,45 @@
 // Canvas CRT + optional video channels + slow "serious" distortion build-up
 
 const CHANNELS = [
-  // You can replace these placeholders with your real clips.
-  // Put the files in /assets/videos and update src.
-  { ch:  1, type: 'color', name: 'POLTERTV',   hex: '#18b507cb', r:26,  g:24,  b:20,  desc:'OR THE LIFE IF U PREFER'},
-  { ch:  2, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment', src:'./assets/videos/clip-02.mp4' },
-  { ch:  3, type: 'video', name: 'Room',  hex: '#6b7f8e', r:107, g:127, b:142, desc:'still laughing',    src:'./assets/videos/clip-03.mp4' },
-  { ch:  4, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight', src:'./assets/videos/clip-01.mp4' },
-  { ch:  5, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-05.mp4' },
-  { ch:  6, type: 'video', name: 'Clay',  hex: '#9c7c5e', r:156, g:124, b:94,  desc:'exposed earth', src:'./assets/videos/clip-06.mp4' },
+  { ch:  1, type: 'color', name: 'POLTERTV', hex: '#18b507cb', r:26, g:24, b:20, desc:'OR THE LIFE IF U PREFER' },
+  { ch:  2, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment',      src:'./assets/videos/clip-02.mp4' },
+  { ch:  3, type: 'video', name: 'Room',  hex: '#6b7f8e', r:107, g:127, b:142, desc:'still laughing',         src:'./assets/videos/clip-03.mp4' },
+  { ch:  4, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight',    src:'./assets/videos/clip-01.mp4' },
+  { ch:  5, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-05.mp4' },
+  { ch:  6, type: 'video', name: 'Clay',  hex: '#9c7c5e', r:156, g:124, b:94,  desc:'exposed earth',          src:'./assets/videos/clip-06.mp4' },
   { ch:  7, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-07.mp4' },
-  { ch:  8, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom', src:'./assets/videos/clip-08.mp4' },
-  { ch:  9, type: 'video', name: 'Dust',  hex: '#c8bfad', r:200, g:191, b:173, desc:'dry road before rain', src:'./assets/videos/clip-09.mp4' },
+  { ch:  8, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom',  src:'./assets/videos/clip-08.mp4' },
+  { ch:  9, type: 'video', name: 'Dust',  hex: '#c8bfad', r:200, g:191, b:173, desc:'dry road before rain',   src:'./assets/videos/clip-09.mp4' },
   { ch: 10, type: 'video', name: 'Stone', hex: '#e8e2d9', r:232, g:226, b:217, desc:'limestone in afternoon light', src:'./assets/videos/clip-10.mp4' },
-  { ch:  11, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom', src:'./assets/videos/clip-11.mp4' },
-  { ch:  12, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom', src:'./assets/videos/clip-12.mp4' },
-  { ch:  13, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-13.mp4' },
-  { ch:  14, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-14.mp4' },
-  { ch:  15, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-15.mp4' },
-  { ch:  16, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment', src:'./assets/videos/clip-16.mp4' },
-  { ch:  17, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-17.mp4' },
-  { ch:  18, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-18.mp4' },
-  { ch:  19, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-19.mp4' },
-  { ch:  20, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-20.mp4' },
-  { ch:  21, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-21.mp4' },
-  { ch:  22, type: 'video', name: 'Room',  hex: '#6b7f8e', r:107, g:127, b:142, desc:'still laughing',    src:'./assets/videos/clip-22.mp4' },
-  { ch:  23, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-23.mp4' },
-  { ch:  24, type: 'video', name: 'Dust',  hex: '#c8bfad', r:200, g:191, b:173, desc:'dry road before rain', src:'./assets/videos/clip-24.mp4' },
-  { ch:  25, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-25.mp4' },
-  { ch:  26, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-26.mp4' },
-  { ch:  27, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-27.mp4' },
-  { ch:  28, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-28.mp4' },
-  { ch:  29, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment', src:'./assets/videos/clip-29.mp4' },
-  { ch:  30, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment', src:'./assets/videos/clip-30.mp4' },
-  { ch:  31, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-31.mp4' },
-  { ch:  32, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',      src:'./assets/videos/clip-32.mp4' },
-  { ch:  33, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-33.mp4' },
-  { ch:  34, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-34.mp4' },
-  { ch:  35, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom', src:'./assets/videos/clip-35.mp4' },
-  { ch:  36, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom', src:'./assets/videos/clip-36.mp4' },
-  { ch:  37, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight', src:'./assets/videos/clip-37.mp4' },
-  { ch:  38, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight', src:'./assets/videos/clip-38.mp4' },
+  { ch: 11, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom',  src:'./assets/videos/clip-11.mp4' },
+  { ch: 12, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom',  src:'./assets/videos/clip-12.mp4' },
+  { ch: 13, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-13.mp4' },
+  { ch: 14, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-14.mp4' },
+  { ch: 15, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-15.mp4' },
+  { ch: 16, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment',      src:'./assets/videos/clip-16.mp4' },
+  { ch: 17, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-17.mp4' },
+  { ch: 18, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-18.mp4' },
+  { ch: 19, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-19.mp4' },
+  { ch: 20, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-20.mp4' },
+  { ch: 21, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-21.mp4' },
+  { ch: 22, type: 'video', name: 'Room',  hex: '#6b7f8e', r:107, g:127, b:142, desc:'still laughing',         src:'./assets/videos/clip-22.mp4' },
+  { ch: 23, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-23.mp4' },
+  { ch: 24, type: 'video', name: 'Dust',  hex: '#c8bfad', r:200, g:191, b:173, desc:'dry road before rain',   src:'./assets/videos/clip-24.mp4' },
+  { ch: 25, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-25.mp4' },
+  { ch: 26, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-26.mp4' },
+  { ch: 27, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-27.mp4' },
+  { ch: 28, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-28.mp4' },
+  { ch: 29, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment',      src:'./assets/videos/clip-29.mp4' },
+  { ch: 30, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment',      src:'./assets/videos/clip-30.mp4' },
+  { ch: 31, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-31.mp4' },
+  { ch: 32, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-32.mp4' },
+  { ch: 33, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-33.mp4' },
+  { ch: 34, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-34.mp4' },
+  { ch: 35, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom',  src:'./assets/videos/clip-35.mp4' },
+  { ch: 36, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom',  src:'./assets/videos/clip-36.mp4' },
+  { ch: 37, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight',    src:'./assets/videos/clip-37.mp4' },
+  { ch: 38, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight',    src:'./assets/videos/clip-38.mp4' },
+  { ch: 39, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight',    src:'./assets/videos/clip-39.mp4' },
 ];
 
 const tvScreen = document.getElementById('tvScreen');
@@ -76,7 +75,7 @@ let staticBurst  = 0;
 let switching    = false;
 let scanOffset   = 0;
 let glitchTimer  = 0;
-let frameCount  = 0;
+let frameCount   = 0;
 
 // Power
 let tvOn = true;
@@ -88,28 +87,30 @@ const volBtn = document.getElementById('volBtn');
 let volumeStep = 3; // 0..4 (default pretty loud)
 const VOLUME_STEPS = [0.0, 0.25, 0.5, 0.75, 1.0];
 let volumeOSDUntil = 0;
+
 function setVolumeStep(step, showOsd = true) {
   volumeStep = Math.max(0, Math.min(4, step));
   const v = VOLUME_STEPS[volumeStep];
 
-  // Mute step is real mute.
   try {
     videoEl.muted = (v === 0);
-    videoEl.volume = v; // fallback / also affects some implementations
+    videoEl.volume = v; // fallback
   } catch {}
 
-  // If audio chain exists, masterGain is the authoritative control.
+  // Authoritative control when WebAudio is enabled
   if (audioEnabled && masterGain && audioCtx) {
     masterGain.gain.setTargetAtTime(v, audioCtx.currentTime, 0.03);
   }
 
   if (showOsd) volumeOSDUntil = performance.now() + 1800;
 }
+
 function bumpVolume(delta) {
   if (!tvOn) return;
 
   // Keep the "self-typing" behavior moving even while other actions happen.
   tickPossessedTyping();
+
   ensureAudio();
   if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} }
 
@@ -137,11 +138,8 @@ function setPowerState(isOn) {
     staticBurst = 0;
     try { videoEl.pause(); } catch {}
   } else {
-    // Try resume if current channel is video
     loadVideoForChannel(CHANNELS[currentIdx]);
-    // Apply volume to current mode
     setVolumeStep(volumeStep, false);
-    // Small burst for that "power on" feel
     staticBurst = 0.9;
   }
 }
@@ -183,35 +181,38 @@ function togglePower() {
 let switchCount  = 0;
 let timeAlive    = 0;
 
-// Corruzione continua 0..1 (cresce lentamente nel tempo e con gli switch)
+// Corruzione continua 0..1
 let corruption = 0;
 
-// Distorsione "base" + spike occasionali (per dare colpi forti ogni tanto)
-let distortionLevel = 0;       // 0..3 (stadi grossi)
-let distortionStrength = 0.0;  // 0..1 (fine-tuning)
-let spikeAmp = 0.0;            // 0..1 (picchi brevi, audio+video)
-let spikeT = 0.0;              // timer spike
-let nextSpikeAt = 5.0;         // in secondi (varia nel tempo)
+// Distorsione "base" + spike
+let distortionLevel = 0;       // 0..3
+let distortionStrength = 0.0;  // 0..1
+let spikeAmp = 0.0;            // 0..1
+let spikeT = 0.0;
+let nextSpikeAt = 5.0;
 
-// Late-game autonomy (TV starts doing things by itself)
+// Late-game autonomy
 let nextAutonomyAt = 9999;
 
-// Scary flashes (late-game): quick red wash + OSD hit
+// Scary flashes (late-game)
 let scareFlash = 0.0; // 0..1
 let scareHold = 0.0;  // seconds
 
-// Possession Phase 2 (ultra): self-dial 666, power blink, freeze-frame hits
-let flickerOffUntil = 0;        // timestamp ms (render black while active)
-let hardCooldownUntil = 0;      // timestamp ms (prevents big scares spamming)
-let possessedTyping = false;    // TV is typing the channel number by itself
-let possessedTarget = '';       // e.g. '666'
-let possessedNextTypeAt = 0;    // timestamp ms
-let possessedAttempts = 0;      // count attempts in current run
-let freezeUntil = 0;            // timestamp ms (freeze video)
-let freezeText = '';            // overlay message during freeze
-let freezeTextUntil = 0;        // timestamp ms
-let stingerUntil = 0;           // timestamp ms (strong red/flash overlay)
+// Possession Phase 2 (ultra)
+let flickerOffUntil = 0;
+let hardCooldownUntil = 0;
+let possessedTyping = false;
+let possessedTarget = '';
+let possessedNextTypeAt = 0;
+let possessedAttempts = 0;
+let freezeUntil = 0;
+let freezeText = '';
+let freezeTextUntil = 0;
+let stingerUntil = 0;
 
+// Freeze-frame buffer (real freeze, not just pause)
+const freezeFrame = document.createElement('canvas');
+let freezeFrameCtx = freezeFrame.getContext('2d', { alpha: false });
 
 // Secret channel unlock (7391)
 const secretSeq = [7,3,9,1];
@@ -219,15 +220,20 @@ let inputBuf = [];
 
 const strip = document.getElementById('channelStrip');
 
-// Retro channel input (digit keypad, shows underscore cursor)
+// Retro channel input
 let channelInput = '';
 let channelInputTimer = null;
-// You said: channels up to 150, and the secret channel must be 666.
-// Keep the OSD consistent and allow 3-digit input.
 const MAX_CHANNEL_NUMBER = 150;
 const SECRET_CHANNEL_NUMBER = 666;
-const CHANNEL_INPUT_MAX_DIGITS = String(Math.max(MAX_CHANNEL_NUMBER, SECRET_CHANNEL_NUMBER)).length; // => 3
-const CHANNEL_INPUT_COMMIT_MS = 1100; // a bit more time to type 3 digits
+const CHANNEL_INPUT_MAX_DIGITS = String(Math.max(MAX_CHANNEL_NUMBER, SECRET_CHANNEL_NUMBER)).length; // 3
+const CHANNEL_INPUT_COMMIT_MS = 1100;
+
+// Balanced possession: micro-frame + cult mode scheduling
+let lastMicroFrameAt = 0;
+let microFrameUntil = 0;
+let lastCultAt = 0;
+let cultModeActive = false;
+let cultUntil = 0;
 
 function resetChannelInput() {
   channelInput = '';
@@ -242,7 +248,6 @@ function commitChannelInput() {
   const num = parseInt(channelInput, 10);
   resetChannelInput();
 
-  // Find by channel number (ch field), fallback: ignore invalid
   const idx = CHANNELS.findIndex(c => c.ch === num);
   if (idx !== -1) switchTo(idx);
 }
@@ -252,18 +257,16 @@ function pushDigit(d) {
   ensureAudio();
   if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} }
 
-    // Allow composing channel numbers (e.g. 5_ then 53_). After max digits, restart.
   if (channelInput.length >= CHANNEL_INPUT_MAX_DIGITS) channelInput = '';
   channelInput += String(d);
 
-  // Track secret sequence as individual digits
+  // Track secret sequence
   inputBuf.push(d);
   if (inputBuf.length > 4) inputBuf.shift();
   if (inputBuf.length === 4 && inputBuf.every((v, i) => v === secretSeq[i])) {
     unlockSecretChannel();
   }
 
-  // Auto-commit after a short pause, like old TVs
   if (channelInputTimer) clearTimeout(channelInputTimer);
   channelInputTimer = setTimeout(() => commitChannelInput(), CHANNEL_INPUT_COMMIT_MS);
 }
@@ -282,9 +285,7 @@ digits.forEach(d => {
   channelButtons.push(btn);
 });
 
-function updateButtons(idx) {
-  // Optional: highlight the digit buttons? We keep it clean, no active state.
-}
+function updateButtons(idx) {}
 
 // Phosphor glow
 function setGlow(ch) {
@@ -298,8 +299,7 @@ function setGlow(ch) {
   `;
 }
 
-
-// Small helper for rounded rectangles (keeps compatibility if roundRect() isn't supported)
+// Rounded rectangles
 function roundRect(ctx, x, y, w, h, r) {
   const rr = Math.max(0, Math.min(r, Math.min(w, h) / 2));
   ctx.moveTo(x + rr, y);
@@ -339,17 +339,12 @@ function loadVideoForChannel(ch) {
   currentVideoSrc = ch.src;
 
   videoEl.pause();
-  videoEl.muted = false; // set true if you want silent by default
-  // No loop: when a clip ends we can auto-advance to the next channel.
+  videoEl.muted = false;
   videoEl.loop = false;
   videoEl.playsInline = true;
 
   videoEl.src = ch.src;
-  const playAttempt = () => videoEl.play().catch(() => {
-    // Autoplay might be blocked until user interacts.
-  });
-
-  // Try to play once metadata is ready
+  const playAttempt = () => videoEl.play().catch(() => {});
   videoEl.onloadedmetadata = playAttempt;
   playAttempt();
 }
@@ -361,14 +356,11 @@ videoEl.addEventListener('ended', () => {
   const ch = CHANNELS[currentIdx];
   if (!ch || ch.type !== 'video') return;
   if (switching) return;
-  // If the user touched something in the last 2.5s, don't auto-jump.
   if (performance.now() - lastUserActionAt < 2500) return;
   next();
 });
 
-
-// ── AUDIO (Web Audio API) ─────────────────────────────────────────
-// Nota: per policy dei browser, l'audio può partire solo dopo una gesture utente.
+// AUDIO (Web Audio API)
 let audioCtx = null;
 let mediaSrc = null;
 let masterGain = null;
@@ -383,10 +375,9 @@ let audioEnabled = false;
 let firstGestureSeen = false;
 
 function makeDistortionCurve(amount = 0) {
-  // amount: 0..1
   const n = 2048;
   const curve = new Float32Array(n);
-  const k = 2 + amount * 98; // 2..100
+  const k = 2 + amount * 98;
   for (let i = 0; i < n; i++) {
     const x = (i * 2) / (n - 1) - 1;
     curve[i] = ((1 + k) * x) / (1 + k * Math.abs(x));
@@ -397,16 +388,12 @@ function makeDistortionCurve(amount = 0) {
 function ensureAudio() {
   if (audioEnabled) return;
 
-  // Mark we had a gesture
   firstGestureSeen = true;
 
   try {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    // Media element source can be created only once per element.
     mediaSrc = audioCtx.createMediaElementSource(videoEl);
 
-    // Chain: media -> preGain -> lowpass -> shaper -> delay mix -> master
     preGain = audioCtx.createGain();
     lpFilter = audioCtx.createBiquadFilter();
     lpFilter.type = 'lowpass';
@@ -417,31 +404,26 @@ function ensureAudio() {
     delay = audioCtx.createDelay(1.0);
     delay.delayTime.value = 0.12;
 
-    delayGain = audioCtx.createGain();     // wet amount
-    feedbackGain = audioCtx.createGain();  // feedback loop
+    delayGain = audioCtx.createGain();
+    feedbackGain = audioCtx.createGain();
 
     masterGain = audioCtx.createGain();
 
-    // Feedback loop: delay -> feedback -> delay
     delay.connect(feedbackGain);
     feedbackGain.connect(delay);
 
-    // Routing: dry + wet
     mediaSrc.connect(preGain);
     preGain.connect(lpFilter);
     lpFilter.connect(shaper);
 
-    // Dry to master
     shaper.connect(masterGain);
 
-    // Wet to master
     shaper.connect(delay);
     delay.connect(delayGain);
     delayGain.connect(masterGain);
 
     masterGain.connect(audioCtx.destination);
 
-    // Start in "clean" mode (then apply volume step)
     masterGain.gain.value = 0.9;
     preGain.gain.value = 1.0;
     lpFilter.frequency.value = 18000;
@@ -451,26 +433,23 @@ function ensureAudio() {
 
     audioEnabled = true;
 
-    // Apply current volume step to the audio chain
     setVolumeStep(volumeStep, false);
   } catch (e) {
-    // If audio fails, we just keep visuals.
     audioEnabled = false;
   }
 }
 
-// Applies audio params based on corruption and spikes
 function setAudioMood(c, spikeAmp) {
   if (!audioEnabled || !audioCtx) return;
 
-  // c: 0..1
-  // Early: almost clean. Late: darker, thicker, slightly unstable.
-  const dark = c * c; // ease in
+  const dark = c * c;
 
-  const cutoff = 18000 - dark * 14000;         // 18k -> 4k
-  const drive  = Math.min(1, dark * 0.9 + spikeAmp * 0.8);
-  const wet    = Math.min(0.55, dark * 0.22 + spikeAmp * 0.35);
-  const fb     = Math.min(0.45, dark * 0.18 + spikeAmp * 0.25);
+  // IMPORTANT: keep it less "annoying"
+  // Cutoff stays higher than before, drive is gentler, wet/fb smaller
+  const cutoff = 18000 - dark * 11000;         // 18k -> 7k-ish
+  const drive  = Math.min(1, dark * 0.55 + spikeAmp * 0.75);
+  const wet    = Math.min(0.35, dark * 0.12 + spikeAmp * 0.30);
+  const fb     = Math.min(0.28, dark * 0.10 + spikeAmp * 0.22);
 
   lpFilter.frequency.setTargetAtTime(cutoff, audioCtx.currentTime, 0.02);
   shaper.curve = makeDistortionCurve(drive);
@@ -478,105 +457,118 @@ function setAudioMood(c, spikeAmp) {
   delayGain.gain.setTargetAtTime(wet, audioCtx.currentTime, 0.03);
   feedbackGain.gain.setTargetAtTime(fb, audioCtx.currentTime, 0.03);
 
-  // Slight master tremble when very corrupted
-  const tremble = dark > 0.65 ? (0.985 + Math.sin(frameCount * 0.07) * 0.015) : 1.0;
-  masterGain.gain.setTargetAtTime(0.9 * tremble, audioCtx.currentTime, 0.02);
+  const tremble = dark > 0.75 ? (0.99 + Math.sin(frameCount * 0.06) * 0.01) : 1.0;
+  masterGain.gain.setTargetAtTime(VOLUME_STEPS[volumeStep] * tremble, audioCtx.currentTime, 0.02);
 
-  // Pitch wobble via playbackRate (subtle). Spike makes it noticeable.
   if (videoEl && CHANNELS[currentIdx] && CHANNELS[currentIdx].type === 'video') {
-    const baseRate = 1.0 - dark * 0.03;
-    const wobble = (dark > 0.35 ? Math.sin(frameCount * 0.03) * (0.002 + dark * 0.004) : 0);
-    const spikeDrop = spikeAmp * 0.06;
-    const r = Math.max(0.85, Math.min(1.02, baseRate + wobble - spikeDrop));
+    const baseRate = 1.0 - dark * 0.02;
+    const wobble = (dark > 0.45 ? Math.sin(frameCount * 0.03) * (0.001 + dark * 0.003) : 0);
+    const spikeDrop = spikeAmp * 0.055;
+    const r = Math.max(0.88, Math.min(1.02, baseRate + wobble - spikeDrop));
     videoEl.playbackRate = r;
   }
 }
 
-// Distortion schedule
+// Helpers
+function clamp01(x) { return Math.max(0, Math.min(1, x)); }
 
 function smoothstep(edge0, edge1, x) {
   const t = clamp01((x - edge0) / (edge1 - edge0));
   return t * t * (3 - 2 * t);
 }
 
-// Distortion schedule: parte "easy" e poi diventa sempre più inquietante.
-// - base: cresce lentamente
-// - spike: colpi forti ogni tanto (audio+video)
-// - late game: più frequente, più scuro, più instabile
+// Distortion schedule
 function updateDistortion(dt) {
   timeAlive += dt;
 
-  // Corruzione continua (0..1) con easing
-  const tTime = smoothstep(25, 320, timeAlive);        // molto lenta
-  const tSw   = smoothstep(8, 180, switchCount);       // pressione da switch
-  corruption = clamp01(Math.max(tTime * 0.85, tSw * 0.75));
+  // Start corruption earlier for live usefulness
+  const tTime = smoothstep(20, 180, timeAlive);
+  const tSw   = smoothstep(8, 180, switchCount);
+  corruption = clamp01(Math.max(tTime * 0.90, tSw * 0.75));
 
-  // Stadi grossi, ma all'inizio restano bassi
-  distortionLevel = Math.floor(corruption * 3.2); // 0..3
+  // Intensifies after 10 minutes
+  if (timeAlive > 600) {
+    corruption = clamp01(corruption + 0.0006);
+  }
+
+  distortionLevel = Math.floor(corruption * 3.2);
   distortionStrength = clamp01(corruption * 1.05);
 
-  // Scheduler spike: rarissimi all'inizio, più frequenti dopo.
-  // Intervallo medio: 18s early -> 7s late, then 6s -> 3.5s in late late.
-  const lateBoost = smoothstep(0.75, 0.98, corruption); // ramps near the end
+  const lateBoost = smoothstep(0.75, 0.98, corruption);
   const mean = (18 - corruption * 11) - lateBoost * 2.4;
   spikeT += dt;
 
   if (spikeT >= nextSpikeAt) {
     spikeT = 0;
 
-    // Probabilità: all'inizio bassa, poi cresce. Non sempre spike, così resta imprevedibile.
-    const p = (0.12 + corruption * 0.45) + lateBoost * 0.22; // rarer early, heavier late
+    const p = (0.10 + corruption * 0.40) + lateBoost * 0.20;
     if (Math.random() < p) {
-      // Spike amplitude: usually moderate, occasionally a nasty hit (even early)
       const nasty = Math.random() < (0.10 + lateBoost * 0.10);
       const rand = 0.75 + Math.random() * 0.55;
-      spikeAmp = (0.22 + corruption * 0.52 + lateBoost * 0.20) * rand + (nasty ? 0.22 : 0);
+
+      spikeAmp = (0.18 + corruption * 0.48 + lateBoost * 0.18) * rand + (nasty ? 0.20 : 0);
       spikeAmp = Math.min(1.1, spikeAmp);
       staticBurst = Math.max(staticBurst, nasty ? 1.0 : 0.85);
     }
 
-    // Prossimo spike con jitter
     nextSpikeAt = Math.max(4.5, mean + (Math.random() - 0.5) * 6);
   }
 
-  // Decadimento spike (brevissimo, "colpo" tipo interferenza)
-  spikeAmp = spikeAmp > 0.001 ? spikeAmp * (0.78 - corruption * 0.10 - lateBoost * 0.06) : 0;
+  spikeAmp = spikeAmp > 0.001 ? spikeAmp * (0.80 - corruption * 0.10 - lateBoost * 0.06) : 0;
 
-  // Late-game scare flashes (rare): red wash + hit.
-  // Kept rare so it stays effective.
   if (corruption > 0.82) {
     const ultra = smoothstep(0.88, 0.99, corruption);
-    const chancePerSec = 0.0012 + ultra * 0.006; // ~0.12%/s early late → ~0.72%/s ultra
+    const chancePerSec = 0.0012 + ultra * 0.006;
     if (Math.random() < chancePerSec * dt) {
       scareFlash = 1.0;
       scareHold = 0.16 + ultra * 0.10;
-      // Force a strong spike (audio+visual) for the "hit"
       spikeAmp = Math.max(spikeAmp, 1.0);
       staticBurst = Math.max(staticBurst, 1.0);
     }
   }
 
+  // Auto-unlock 666 in extreme late game
+  if (!secretUnlocked && corruption > 0.93 && timeAlive > 320) {
+    unlockSecretChannel();
+  }
 
-// Auto-unlock 666 in extreme late game (possession forces the archive channel to exist)
-if (!secretUnlocked && corruption > 0.93 && timeAlive > 320) {
-  unlockSecretChannel();
-}
+  // Balanced Cult Mode
+  updateCultMode();
 
-  // Applica mood audio (se attivo)
   setAudioMood(corruption, spikeAmp);
 }
 
-function updateAutonomy(dt) {
-  // Progressive "TV possesses itself" behavior.
-  // Not gated only by inactivity: it can happen even while the user is active,
-  // but activity reduces frequency. Late-game ramps hard.
+// Balanced Cult Mode scheduling
+function updateCultMode() {
+  const now = performance.now();
 
+  // Start around 8 minutes
+  if (timeAlive < 480) return;
+
+  // Cooldown 60s
+  if (now - lastCultAt < 60000) {
+    if (cultModeActive && now >= cultUntil) cultModeActive = false;
+    return;
+  }
+
+  // Chance increases after 10 minutes
+  const after10 = timeAlive >= 600;
+  const chance = after10 ? 0.012 : 0.008; // per second-ish, applied via frame roll
+  if (Math.random() < chance * (1 / 60)) {
+    lastCultAt = now;
+    cultModeActive = true;
+    cultUntil = now + (after10 ? 5200 : 3200);
+  }
+
+  if (cultModeActive && now >= cultUntil) cultModeActive = false;
+}
+
+function updateAutonomy(dt) {
   if (!tvOn) return;
 
   const now = performance.now();
   const idleMs = now - lastUserActionAt;
 
-  // Arm window: starts subtly, becomes aggressive.
   const late     = (timeAlive > 170 && corruption > 0.70);
   const veryLate = (timeAlive > 260 && corruption > 0.82);
   const ultra    = (timeAlive > 360 && corruption > 0.90);
@@ -586,67 +578,52 @@ function updateAutonomy(dt) {
     return;
   }
 
-  // Cooldown scheduling (so it doesn't spam actions every frame).
   if (now < nextAutonomyAt) return;
 
-  // Activity factor: 0 when actively interacting, 1 when idle for ~9s+
   const activity = clamp01(idleMs / 9000);
-
-  // Chance per second to trigger an action.
-  // Even when active, keep a small baseline so it can happen while scrolling.
   const c = clamp01(corruption);
-  const base = 0.015 + c * 0.045;                 // 0.015..0.060
-  const idleBoost = activity * (0.020 + c * 0.060); // adds when idle
+
+  // More present even while active
+  const base = 0.03 + c * 0.07;
+  const idleBoost = activity * (0.020 + c * 0.060);
   const lateBoost = veryLate ? 0.025 : 0.0;
   const ultraBoost = ultra ? 0.040 : 0.0;
 
   const chancePerSec = base + idleBoost + lateBoost + ultraBoost;
-
-  // Roll
   const roll = Math.random();
 
-if (roll < chancePerSec * dt) {
-  // Choose an action (weighted by severity)
-  const r = Math.random();
+  if (roll < chancePerSec * dt) {
+    const r = Math.random();
 
-  // Ultra events (rare but spicy)
-  if (ultra && r < 0.12) {
-    triggerStinger();
-  } else if ((veryLate || ultra) && r < (ultra ? 0.24 : 0.14)) {
-    triggerPowerBlink();
-  } else if ((veryLate || ultra) && r < (ultra ? 0.46 : 0.30)) {
-    const msgs = ['YOU WERE HERE', 'STAY', 'NO SIGNAL', 'DO NOT SWITCH'];
-    startFreezeHit(msgs[(Math.random() * msgs.length) | 0]);
-  } else if ((veryLate || ultra) && r < (ultra ? 0.66 : 0.48)) {
-    // It wants 666
-    startPossessedTyping(SECRET_CHANNEL_NUMBER);
-  } else if (r < (ultra ? 0.82 : veryLate ? 0.78 : 0.66)) {
-    // Self channel hop (small -> bigger as it gets worse)
-    const maxHop = ultra ? 6 : veryLate ? 4 : 2;
-    const hop = (Math.random() < 0.5 ? -1 : 1) * (1 + ((Math.random() * maxHop) | 0));
-    resetChannelInput();
-    switchTo(currentIdx + hop);
-  } else if (r < (ultra ? 0.92 : veryLate ? 0.90 : 0.86)) {
-    // Volume twitch (subtle early, meaner later)
-    const delta = (Math.random() < 0.55 ? 1 : -1) * (ultra ? 2 : 1);
-    setVolumeStep(volumeStep + delta);
-  } else {
-    // Strong interference hit (visual + audio)
-    spikeAmp = Math.max(spikeAmp, 0.55 + (veryLate ? 0.22 : 0.08) + (ultra ? 0.10 : 0));
-    staticBurst = Math.max(staticBurst, 1.0);
-  }
-    // Schedule next action sooner as it gets worse.
+    if (ultra && r < 0.12) {
+      triggerStinger();
+    } else if ((veryLate || ultra) && r < (ultra ? 0.24 : 0.14)) {
+      triggerPowerBlink();
+    } else if ((veryLate || ultra) && r < (ultra ? 0.46 : 0.30)) {
+      const msgs = ['YOU WERE HERE', 'STAY', 'NO SIGNAL', 'DO NOT SWITCH'];
+      startFreezeHit(msgs[(Math.random() * msgs.length) | 0]);
+    } else if ((veryLate || ultra) && r < (ultra ? 0.66 : 0.48)) {
+      startPossessedTyping(SECRET_CHANNEL_NUMBER);
+    } else if (r < (ultra ? 0.82 : veryLate ? 0.78 : 0.66)) {
+      const maxHop = ultra ? 6 : veryLate ? 4 : 2;
+      const hop = (Math.random() < 0.5 ? -1 : 1) * (1 + ((Math.random() * maxHop) | 0));
+      resetChannelInput();
+      switchTo(currentIdx + hop);
+    } else if (r < (ultra ? 0.92 : veryLate ? 0.90 : 0.86)) {
+      const delta = (Math.random() < 0.55 ? 1 : -1) * (ultra ? 2 : 1);
+      setVolumeStep(volumeStep + delta);
+    } else {
+      spikeAmp = Math.max(spikeAmp, 0.55 + (veryLate ? 0.22 : 0.08) + (ultra ? 0.10 : 0));
+      staticBurst = Math.max(staticBurst, 1.0);
+    }
+
     const baseMs = ultra ? 1300 : veryLate ? 2200 : 3600;
     const jitter = (Math.random() - 0.5) * (ultra ? 800 : veryLate ? 1200 : 1800);
     nextAutonomyAt = now + Math.max(750, baseMs + jitter);
   } else {
-    // No action: check again soon (but not every frame)
     nextAutonomyAt = now + (ultra ? 250 : 450);
   }
 }
-
-function clamp01(x) { return Math.max(0, Math.min(1, x)); }
-
 
 function canDoHardScare() {
   const now = performance.now();
@@ -660,13 +637,12 @@ function setHardCooldown(ms) {
 function triggerPowerBlink() {
   if (!canDoHardScare()) return;
 
-  // CRT collapse + brief black, without actually turning TV off
   switching = true;
   staticBurst = 1.0;
   tvScreen.classList.add('switching');
 
   const now = performance.now();
-  flickerOffUntil = now + 140; // black for a blink
+  flickerOffUntil = now + 140;
 
   setTimeout(() => {
     tvScreen.classList.remove('switching');
@@ -679,17 +655,22 @@ function triggerPowerBlink() {
 function startFreezeHit(text) {
   if (!canDoHardScare()) return;
 
-  // Freeze current video frame by pausing for a short moment
-  if (CHANNELS[currentIdx] && CHANNELS[currentIdx].type === 'video') {
-    try { videoEl.pause(); } catch {}
+  // Capture a real freeze frame from the current video
+  if (CHANNELS[currentIdx] && CHANNELS[currentIdx].type === 'video' && videoEl.readyState >= 2) {
+    try {
+      freezeFrame.width = CW;
+      freezeFrame.height = CH;
+      freezeFrameCtx.setTransform(1,0,0,1,0,0);
+      freezeFrameCtx.drawImage(videoEl, 0, 0, CW, CH);
+      videoEl.pause();
+    } catch {}
   }
 
   const now = performance.now();
-  freezeUntil = now + 520; // total freeze time
+  freezeUntil = now + 520;
   freezeText = text || '';
   freezeTextUntil = now + 520;
 
-  // Strong interference
   spikeAmp = Math.max(spikeAmp, 1.0);
   staticBurst = Math.max(staticBurst, 1.0);
   scareFlash = Math.max(scareFlash, 0.85);
@@ -737,23 +718,16 @@ function tickPossessedTyping() {
     return;
   }
 
-  // Type 1 digit at a time, showing CH 6_ / CH 66_ / CH 666
   const nextLen = (channelInput.length || 0) + 1;
   channelInput = possessedTarget.slice(0, nextLen);
 
-  // occasional "hesitation"
   const hesitation = Math.random() < 0.22;
   possessedNextTypeAt = now + (hesitation ? 520 : 220);
 
   if (channelInput.length >= possessedTarget.length) {
-    // Commit after a short pause
     possessedNextTypeAt = now + 380;
     possessedAttempts++;
-
-    // Commit now
     commitChannelInput();
-
-    // Stop after a couple attempts to avoid spam
     if (possessedAttempts >= 2) {
       stopPossessedTyping();
     }
@@ -763,7 +737,6 @@ function tickPossessedTyping() {
 function triggerStinger() {
   if (!canDoHardScare()) return;
 
-  // A rare "oh no" moment: red wash + spike + blink, then it tries to go 666.
   const now = performance.now();
   stingerUntil = now + 350;
 
@@ -772,15 +745,12 @@ function triggerStinger() {
   scareFlash = Math.max(scareFlash, 1.0);
   scareHold = Math.max(scareHold, 0.18);
 
-  // Start typing 666 shortly after
   setTimeout(() => startPossessedTyping(SECRET_CHANNEL_NUMBER), 180);
 
   setHardCooldown(4200);
 }
 
-
 // Visual effects
-
 function applyFlicker(strength) {
   if (strength <= 0) return;
   const a = 0.012 + strength * 0.06;
@@ -790,8 +760,6 @@ function applyFlicker(strength) {
     ctx.fillRect(0, 0, CW, CH);
   }
 }
-
-
 
 function applyShear(strength) {
   if (strength <= 0) return;
@@ -805,13 +773,10 @@ function applyShear(strength) {
   const img = ctx.getImageData(0, y, CW, bandH);
   ctx.putImageData(img, dx, y);
 
-  // Clean edges lightly (keeps it "aesthetic", not noisy garbage)
   ctx.fillStyle = 'rgba(0,0,0,0.10)';
   if (dx > 0) ctx.fillRect(0, y, dx, bandH);
   else ctx.fillRect(CW + dx, y, -dx, bandH);
 }
-
-
 
 function applyRgbSplit(strength) {
   if (strength <= 0) return;
@@ -828,7 +793,6 @@ function applyRgbSplit(strength) {
   ctx.drawImage(off, -shift, 0);
   ctx.drawImage(off, shift, 0);
 
-  // occasional vertical offset gives that "tape slip" feeling
   if (strength > 0.55 && Math.random() < 0.25) {
     const vy = Math.floor((Math.random() - 0.5) * (6 + strength * 10)) * DPR;
     ctx.drawImage(off, 0, vy);
@@ -837,7 +801,6 @@ function applyRgbSplit(strength) {
   ctx.globalCompositeOperation = 'source-over';
   ctx.globalAlpha = 1;
 }
-
 
 // Draw helpers
 function drawVignette() {
@@ -878,14 +841,7 @@ function drawStatic(alpha) {
   ctx.globalAlpha = 1;
 }
 
-
 function drawHauntOverlay(strength, spike) {
-  // "Inclinazione satanica" (creepy serio): degradazione + presenza.
-  // - tinta rossa scura che cresce nel tempo
-  // - ghost OSD "666" rarissimo
-  // - flash "NO CARRIER" durante scare hits (jumpscare light, non gore)
-
-  // Scare flash (indipendente dalla soglia)
   if (scareFlash > 0.01) {
     ctx.save();
     ctx.scale(DPR, DPR);
@@ -893,12 +849,10 @@ function drawHauntOverlay(strength, spike) {
     const w = CW / DPR, h = CH / DPR;
     const a = clamp01(scareFlash);
 
-    // Red wash
     ctx.globalCompositeOperation = 'multiply';
     ctx.fillStyle = `rgba(180, 0, 0, ${0.22 + a * 0.55})`;
     ctx.fillRect(0, 0, w, h);
 
-    // Text hit
     ctx.globalCompositeOperation = 'screen';
     const fs = Math.floor(w * 0.08);
     ctx.font = `bold ${fs}px 'VT323', monospace`;
@@ -917,15 +871,13 @@ function drawHauntOverlay(strength, spike) {
 
   const s = clamp01((strength - 0.45) / 0.55);
 
-  // Persistent dark red vignette as corruption grows (subtle early, heavy late)
   ctx.save();
   ctx.scale(DPR, DPR);
 
   const w = CW / DPR, h = CH / DPR;
-  const redA = 0.04 + s * 0.16 + spike * 0.10; // max ~0.3
+  const redA = 0.04 + s * 0.16 + spike * 0.10;
   ctx.globalCompositeOperation = 'multiply';
 
-  // Vignette
   const vg = ctx.createRadialGradient(w/2, h/2, Math.min(w,h)*0.15, w/2, h/2, Math.min(w,h)*0.75);
   vg.addColorStop(0, `rgba(120,0,0,${0.0})`);
   vg.addColorStop(1, `rgba(160,0,0,${redA})`);
@@ -934,7 +886,6 @@ function drawHauntOverlay(strength, spike) {
 
   ctx.restore();
 
-  // Rare ghost OSD "666"
   const chance = 0.010 + s * 0.020 + spike * 0.050;
   if (Math.random() < chance) {
     ctx.save();
@@ -961,10 +912,78 @@ function drawHauntOverlay(strength, spike) {
   }
 }
 
+// Micro-frame (subliminal)
+function maybeDrawMicroFrame() {
+  const now = performance.now();
+  if (now < microFrameUntil) {
+    drawMicroFrameOverlay();
+    return;
+  }
+
+  // Cooldown 30s
+  if (now - lastMicroFrameAt < 30000) return;
+
+  if (corruption < 0.62) return;
+
+  // Rare, scales with corruption
+  const p = 0.00025 + clamp01((corruption - 0.62) / 0.38) * 0.0010; // about 0.025% -> 0.125% per frame
+  if (Math.random() < p) {
+    lastMicroFrameAt = now;
+    microFrameUntil = now + (Math.random() < 0.25 ? 34 : 17); // 1 or 2 frames
+    drawMicroFrameOverlay();
+  }
+}
+
+function drawMicroFrameOverlay() {
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.85)';
+  ctx.fillRect(0, 0, CW, CH);
+
+  ctx.scale(DPR, DPR);
+  const w = CW / DPR, h = CH / DPR;
+  const fs = Math.floor(w * 0.10);
+  ctx.font = `bold ${fs}px 'VT323', monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  ctx.fillStyle = 'rgba(180, 0, 0, 0.92)';
+  const messages = ['YOU MISSED IT', 'DO NOT SWITCH', 'WE ARE STILL LIVE'];
+  const msg = messages[(Math.random() * messages.length) | 0];
+  ctx.fillText(msg, w / 2, h / 2);
+
+  ctx.restore();
+}
+
+// Cult Mode overlay
+function drawCultModeOverlay() {
+  if (!cultModeActive) return;
+
+  ctx.save();
+  ctx.scale(DPR, DPR);
+
+  const w = CW / DPR, h = CH / DPR;
+
+  // Reduce noise vibe, more "presence"
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.fillStyle = 'rgba(110, 0, 0, 0.30)';
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+  const fs = Math.floor(w * 0.055);
+  ctx.font = `bold ${fs}px 'Share Tech Mono', monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(0,0,0,0.9)';
+  ctx.shadowBlur = 10;
+  ctx.fillText('THE BROADCAST WAS NEVER OFF.', w / 2, h * 0.56);
+
+  ctx.restore();
+}
+
 function drawChannelLabel(ch, osdInput) {
   const { ch: chNum } = ch;
 
-  // Position (top-left). If you ever want it top-right, flip these.
   const x = Math.floor(CW * 0.05);
   const y = Math.floor(CW * 0.10);
 
@@ -979,13 +998,27 @@ function drawChannelLabel(ch, osdInput) {
   const typing = !!(osdInput && osdInput.length);
   const labelNum = typing ? osdInput : String(chNum).padStart(CHANNEL_INPUT_MAX_DIGITS, '0');
 
-  // Blinking cursor underscore when typing (old TV vibe)
   const blinkOn = (Math.floor(frameCount / 20) % 2) === 0;
   const cursor = (typing && blinkOn) ? '_' : (typing ? ' ' : '');
 
-  const labelText = `CH ${labelNum}${cursor}`;
+  let labelText = `CH ${labelNum}${cursor}`;
 
-  // Strong OSD plate behind text (high contrast, always readable)
+  // OSD corruption: intermittent, subtle
+  if (corruption > 0.65 && Math.random() < 0.08) {
+    labelText = labelText
+      .replace(/0/g, 'O')
+      .replace(/1/g, 'I');
+
+    if (corruption > 0.82 && Math.random() < 0.25) {
+      labelText = labelText.replace(/6/g, (Math.random() < 0.5 ? '9' : 'G'));
+    }
+  }
+
+  // Rare hard corruption: flashes as 666 briefly
+  if (corruption > 0.86 && Math.random() < 0.012) {
+    labelText = `CH 666${cursor}`;
+  }
+
   const padX = Math.floor(fontSize * 0.42);
   const padY = Math.floor(fontSize * 0.32);
   const metrics = ctx.measureText(labelText);
@@ -995,18 +1028,15 @@ function drawChannelLabel(ch, osdInput) {
   const bx = Math.floor((x/DPR) - padX);
   const by = Math.floor((y/DPR) - fontSize - padY);
 
-  // Plate
   ctx.fillStyle = 'rgba(0,0,0,0.72)';
   ctx.beginPath();
   roundRect(ctx, bx, by, boxW, boxH, Math.floor(fontSize * 0.22));
   ctx.fill();
 
-  // Outer rim like a real OSD
   ctx.strokeStyle = 'rgba(232,226,217,0.18)';
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  // Text: thick dark outline + bright fill
   ctx.lineJoin = 'round';
   ctx.miterLimit = 2;
 
@@ -1074,10 +1104,7 @@ function drawVolumeOSD() {
     ctx.textAlign = 'left';
   }
 
-
-  // Bars: increasing height like old TVs
   const bx = x + pad + tw + pad;
-  const by = y + pad;
   for (let i = 0; i < bars; i++) {
     const level = i + 1;
     const bh = Math.floor((boxH - pad * 2) * (0.25 + (level / bars) * 0.75));
@@ -1111,7 +1138,6 @@ function drawInfoText(ch) {
   ctx.save();
   ctx.scale(DPR, DPR);
 
-  // Big title
   const nameSize = (CW/DPR) * 0.155;
   ctx.font = `${Math.floor(nameSize)}px 'VT323', monospace`;
   ctx.textAlign = 'center';
@@ -1120,7 +1146,6 @@ function drawInfoText(ch) {
   ctx.fillStyle = mainColor;
   ctx.fillText(String(name).toUpperCase(), (CW/DPR)/2, (CH/DPR)/2 + nameSize*0.34);
 
-  // Sub text
   ctx.font = `${Math.floor((CW/DPR) * 0.055)}px 'Share Tech Mono', monospace`;
   ctx.fillStyle = subColor;
   ctx.fillText(String(hex).toUpperCase(), (CW/DPR)/2, (CH/DPR)/2 + nameSize*0.34 + (CW/DPR)*0.075);
@@ -1134,7 +1159,6 @@ function drawInfoText(ch) {
 
 // Main draw
 function drawChannel(ch) {
-  // TV OFF: render a dead screen
   if (!tvOn) {
     ctx.fillStyle = '#060504';
     ctx.fillRect(0, 0, CW, CH);
@@ -1143,8 +1167,8 @@ function drawChannel(ch) {
     return;
   }
 
-  // Power blink: brief black-out while still "on"
   const nowMs = performance.now();
+
   if (nowMs < flickerOffUntil) {
     ctx.fillStyle = '#050403';
     ctx.fillRect(0, 0, CW, CH);
@@ -1157,9 +1181,13 @@ function drawChannel(ch) {
   ctx.fillStyle = ch.hex;
   ctx.fillRect(0, 0, CW, CH);
 
-  // Video
+  // Video: use captured freeze frame if frozen
   if (ch.type === 'video' && videoEl.readyState >= 2) {
-    ctx.drawImage(videoEl, 0, 0, CW, CH);
+    if (nowMs < freezeUntil && freezeFrame.width === CW && freezeFrame.height === CH) {
+      ctx.drawImage(freezeFrame, 0, 0, CW, CH);
+    } else {
+      ctx.drawImage(videoEl, 0, 0, CW, CH);
+    }
   }
 
   // CRT flavor
@@ -1167,7 +1195,6 @@ function drawChannel(ch) {
   drawPhosphorWarmth(ch);
   drawScanBand();
 
-  // Glitch line (subtle)
   glitchTimer++;
   const glitchChance = 0.02 + distortionLevel * 0.02;
   if (glitchTimer > (140 - distortionLevel * 20) && Math.random() < glitchChance) {
@@ -1177,70 +1204,60 @@ function drawChannel(ch) {
     ctx.fillRect(0, gy, CW, (Math.random() * 2 + 1) * DPR);
   }
 
-  // Channel label is always visible (retro OSD)
   drawChannelLabel(ch, channelInput);
-
-  // Volume OSD (shows when user changes volume)
   drawVolumeOSD();
 
+  // Possession overlays
+  const nowO = performance.now();
 
-// Possession overlays (freeze text / stinger flash)
-const nowO = performance.now();
+  if (nowO < stingerUntil) {
+    const a = clamp01((stingerUntil - nowO) / 350);
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fillStyle = `rgba(190, 0, 0, ${0.22 + a * 0.55})`;
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.restore();
+  }
 
-if (nowO < stingerUntil) {
-  const a = clamp01((stingerUntil - nowO) / 350);
-  ctx.save();
-  ctx.globalCompositeOperation = 'screen';
-  ctx.fillStyle = `rgba(190, 0, 0, ${0.22 + a * 0.55})`;
-  ctx.fillRect(0, 0, CW, CH);
-  ctx.restore();
-}
+  if (nowO < freezeTextUntil && freezeText) {
+    ctx.save();
+    ctx.scale(DPR, DPR);
+    const w = CW / DPR, h = CH / DPR;
+    const fs = Math.floor(w * 0.085);
+    ctx.font = `bold ${fs}px 'VT323', monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
 
-if (nowO < freezeTextUntil && freezeText) {
-  ctx.save();
-  ctx.scale(DPR, DPR);
-  const w = CW / DPR, h = CH / DPR;
-  const fs = Math.floor(w * 0.085);
-  ctx.font = `bold ${fs}px 'VT323', monospace`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
+    const tw = ctx.measureText(freezeText).width;
+    const padX = Math.floor(fs * 0.45);
+    const padY = Math.floor(fs * 0.30);
+    const bx = (w - tw) / 2 - padX;
+    const by = h * 0.33 - fs - padY;
+    const bw = tw + padX * 2;
+    const bh = fs * 1.20 + padY * 2;
 
-  // Plate
-  const tw = ctx.measureText(freezeText).width;
-  const padX = Math.floor(fs * 0.45);
-  const padY = Math.floor(fs * 0.30);
-  const bx = (w - tw) / 2 - padX;
-  const by = h * 0.33 - fs - padY;
-  const bw = tw + padX * 2;
-  const bh = fs * 1.20 + padY * 2;
+    ctx.fillStyle = 'rgba(0,0,0,0.78)';
+    ctx.beginPath();
+    roundRect(ctx, bx, by, bw, bh, Math.floor(fs * 0.22));
+    ctx.fill();
 
-  ctx.fillStyle = 'rgba(0,0,0,0.78)';
-  ctx.beginPath();
-  roundRect(ctx, bx, by, bw, bh, Math.floor(fs * 0.22));
-  ctx.fill();
+    ctx.strokeStyle = 'rgba(232,226,217,0.18)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
 
-  ctx.strokeStyle = 'rgba(232,226,217,0.18)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
+    ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+    ctx.lineWidth = Math.max(2, Math.floor(fs * 0.10));
+    ctx.strokeText(freezeText, w/2, h*0.33);
 
-  ctx.strokeStyle = 'rgba(0,0,0,0.9)';
-  ctx.lineWidth = Math.max(2, Math.floor(fs * 0.10));
-  ctx.strokeText(freezeText, w/2, h*0.33);
+    ctx.fillStyle = 'rgba(232,226,217,0.92)';
+    ctx.fillText(freezeText, w/2, h*0.33);
+    ctx.restore();
+  }
 
-  ctx.fillStyle = 'rgba(232,226,217,0.92)';
-  ctx.fillText(freezeText, w/2, h*0.33);
-  ctx.restore();
-}
-
-  // Full info text only for color channels
   if (ch.type === 'color') drawInfoText(ch);
 
-  // Distortion build-up (easy early, creepier late)
-  // Base strength grows slowly, spikes add short violent hits.
   const base = distortionStrength;
   const spike = spikeAmp;
-
-  // Visual strength: early subtle, late heavier, spikes punch.
   const vis = clamp01(base * 0.9 + spike * 0.95);
 
   if (vis > 0.01) {
@@ -1250,9 +1267,14 @@ if (nowO < freezeTextUntil && freezeText) {
     drawHauntOverlay(base, spike);
   }
 
-  // Static burst after switching and during spikes
+  // Cult Mode sits on top, then micro-frame can punch through for 1 frame
+  drawCultModeOverlay();
+  maybeDrawMicroFrame();
+
   const staticAlpha = clamp01(staticBurst + spike * 0.55) * (0.42 + base * 0.22);
-  drawStatic(staticAlpha);
+
+  // Cult Mode reduces static a bit
+  drawStatic(cultModeActive ? staticAlpha * 0.45 : staticAlpha);
 }
 
 // Switching
@@ -1278,15 +1300,37 @@ function switchTo(idx) {
     switching = false;
   }, 500);
 }
-function next() { if (!tvOn) return; lastUserActionAt = performance.now(); ensureAudio(); if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} } resetChannelInput(); switchTo(currentIdx + 1); }
-function prev() { if (!tvOn) return; lastUserActionAt = performance.now(); ensureAudio(); if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} } resetChannelInput(); switchTo(currentIdx - 1); }
+
+function next() {
+  if (!tvOn) return;
+  lastUserActionAt = performance.now();
+  ensureAudio();
+  if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} }
+  resetChannelInput();
+  switchTo(currentIdx + 1);
+}
+
+function prev() {
+  if (!tvOn) return;
+  lastUserActionAt = performance.now();
+  ensureAudio();
+  if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} }
+  resetChannelInput();
+  switchTo(currentIdx - 1);
+}
 
 // Input
 document.getElementById('nextKnob').addEventListener('click', next);
 document.getElementById('prevKnob').addEventListener('click', prev);
-tvScreen.addEventListener('click', () => { if (tvOn) { ensureAudio(); if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} } next(); } });
+tvScreen.addEventListener('click', () => {
+  if (tvOn) {
+    ensureAudio();
+    if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} }
+    next();
+  }
+});
 
-// Volume button: click up, Shift+click down, wheel to adjust
+// Volume button
 if (volBtn) {
   volBtn.addEventListener('click', (e) => {
     lastUserActionAt = performance.now();
@@ -1305,21 +1349,19 @@ if (powerBtn) powerBtn.addEventListener('click', togglePower);
 // Keyboard
 document.addEventListener('keydown', e => {
   lastUserActionAt = performance.now();
-  // Power
+
   if (e.key === 'p' || e.key === 'P') {
     e.preventDefault();
     togglePower();
     return;
   }
 
-  // Digits build the channel number like a retro TV
   if (/^[0-9]$/.test(e.key)) {
     e.preventDefault();
     pushDigit(parseInt(e.key, 10));
     return;
   }
 
-  // Confirm / clear the composed channel
   if (e.key === 'Enter') {
     e.preventDefault();
     commitChannelInput();
@@ -1348,11 +1390,9 @@ document.addEventListener('keydown', e => {
 
   if (!tvOn) return;
 
-  // Volume hotkeys
   if (e.key === '+' || e.key === '=' ) { e.preventDefault(); bumpVolume(+1); return; }
   if (e.key === '-' || e.key === '_' ) { e.preventDefault(); bumpVolume(-1); return; }
 
-  // Knob style navigation still works
   if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowUp') {
     e.preventDefault();
     next();
@@ -1362,14 +1402,12 @@ document.addEventListener('keydown', e => {
     prev();
   }
 });
-// Treat scrolling / pointer movement as user activity (but autonomy can still act).
+
 window.addEventListener('scroll', () => { lastUserActionAt = performance.now(); }, { passive: true });
 window.addEventListener('pointermove', () => { lastUserActionAt = performance.now(); }, { passive: true });
 window.addEventListener('pointerdown', () => { lastUserActionAt = performance.now(); }, { passive: true });
 
-// NO auto-advance (requested). Channels change only by user input.
-
-// Secret channel (in-memory)
+// Secret channel
 let secretUnlocked = false;
 let secretIdx = -1;
 
@@ -1389,18 +1427,14 @@ function unlockSecretChannel() {
 
   CHANNELS.push(secret);
   secretIdx = CHANNELS.length - 1;
-  // No extra button: access CH 666 by typing 6 6 6 (only after unlock).
 
-  // Spike distortion a little when it unlocks
   distortionLevel = Math.max(distortionLevel, 2);
   staticBurst = 1.0;
 }
 
-// Render loop
+// Init
 setGlow(CHANNELS[currentIdx]);
 loadVideoForChannel(CHANNELS[currentIdx]);
-
-// Initial power state
 setPowerState(true);
 
 let last = performance.now();
@@ -1409,11 +1443,15 @@ function loop(now) {
   last = now;
 
   frameCount++;
+
   updateDistortion(dt);
   updateAutonomy(dt);
+
+  // IMPORTANT: possessed typing must be ticked every frame
+  tickPossessedTyping();
+
   endFreezeIfNeeded(now);
 
-  // Scare flash decay
   if (scareHold > 0) {
     scareHold -= dt;
   } else {
@@ -1421,6 +1459,7 @@ function loop(now) {
   }
 
   staticBurst = staticBurst > 0.01 ? staticBurst * 0.82 : 0;
+
   drawChannel(CHANNELS[currentIdx]);
 
   requestAnimationFrame(loop);
