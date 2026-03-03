@@ -1,5 +1,6 @@
 // After Sign-Off: Interference
-// Canvas CRT + optional video channels + slow "serious" distortion build-up
+// Canvas CRT + video channels + progressive corruption + possession behaviors
+// Fix: no random early autoskips, robust end detection, robust stall recovery
 
 const CHANNELS = [
   { ch:  1, type: 'color', name: 'POLTERTV', hex: '#18b507cb', r:26, g:24, b:20, desc:'OR THE LIFE IF U PREFER' },
@@ -80,11 +81,10 @@ let frameCount   = 0;
 // Power
 let tvOn = true;
 const powerBtn = document.getElementById('powerBtn');
-const ledEl = document.getElementById('led');
-const volBtn = document.getElementById('volBtn');
+const volBtn   = document.getElementById('volBtn');
 
 // Volume (0..4 steps) + OSD
-let volumeStep = 3; // 0..4 (default pretty loud)
+let volumeStep = 3; // 0..4
 const VOLUME_STEPS = [0.0, 0.25, 0.5, 0.75, 1.0];
 let volumeOSDUntil = 0;
 
@@ -94,10 +94,9 @@ function setVolumeStep(step, showOsd = true) {
 
   try {
     videoEl.muted = (v === 0);
-    videoEl.volume = v; // fallback
+    videoEl.volume = v;
   } catch {}
 
-  // Authoritative control when WebAudio is enabled
   if (audioEnabled && masterGain && audioCtx) {
     masterGain.gain.setTargetAtTime(v, audioCtx.currentTime, 0.03);
   }
@@ -107,19 +106,13 @@ function setVolumeStep(step, showOsd = true) {
 
 function bumpVolume(delta) {
   if (!tvOn) return;
-
-  // Keep the "self-typing" behavior moving even while other actions happen.
   tickPossessedTyping();
 
   ensureAudio();
   if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} }
 
-  // Retro TV cycle: 1→2→3→4→MUTE→1...
-  if (delta > 0) {
-    setVolumeStep((volumeStep + 1) % 5);
-  } else if (delta < 0) {
-    setVolumeStep((volumeStep + 4) % 5);
-  }
+  if (delta > 0) setVolumeStep((volumeStep + 1) % 5);
+  else if (delta < 0) setVolumeStep((volumeStep + 4) % 5);
 }
 
 function setPowerState(isOn) {
@@ -129,10 +122,8 @@ function setPowerState(isOn) {
   tvScreen.classList.toggle('off', !tvOn);
   if (powerBtn) powerBtn.setAttribute('aria-pressed', String(tvOn));
 
-  // Disable channel buttons while off
   channelButtons.forEach(btn => (btn.disabled = !tvOn));
 
-  // Freeze video/audio while off
   if (!tvOn) {
     resetChannelInput();
     staticBurst = 0;
@@ -148,7 +139,6 @@ function togglePower() {
   lastUserActionAt = performance.now();
   if (switching) return;
 
-  // Power OFF: play CRT collapse, then actually switch off
   if (tvOn) {
     switching = true;
     staticBurst = 1.0;
@@ -163,7 +153,6 @@ function togglePower() {
     return;
   }
 
-  // Power ON: switch on first, then play the same CRT wake animation
   setPowerState(true);
   ensureAudio();
   if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} }
@@ -178,27 +167,25 @@ function togglePower() {
   }, 450);
 }
 
+// Corruption / distortion
 let switchCount  = 0;
 let timeAlive    = 0;
+let corruption   = 0;
 
-// Corruzione continua 0..1
-let corruption = 0;
-
-// Distorsione "base" + spike
 let distortionLevel = 0;       // 0..3
 let distortionStrength = 0.0;  // 0..1
 let spikeAmp = 0.0;            // 0..1
 let spikeT = 0.0;
 let nextSpikeAt = 5.0;
 
-// Late-game autonomy
+// Autonomy
 let nextAutonomyAt = 9999;
 
-// Scary flashes (late-game)
-let scareFlash = 0.0; // 0..1
-let scareHold = 0.0;  // seconds
+// Scary flashes
+let scareFlash = 0.0;
+let scareHold  = 0.0;
 
-// Possession Phase 2 (ultra)
+// Possession phase 2
 let flickerOffUntil = 0;
 let hardCooldownUntil = 0;
 let possessedTyping = false;
@@ -210,15 +197,18 @@ let freezeText = '';
 let freezeTextUntil = 0;
 let stingerUntil = 0;
 
-// Freeze-frame buffer (real freeze, not just pause)
+// Freeze-frame buffer
 const freezeFrame = document.createElement('canvas');
-let freezeFrameCtx = freezeFrame.getContext('2d', { alpha: false });
+const freezeFrameCtx = freezeFrame.getContext('2d', { alpha: false });
 
-// Secret channel unlock (7391)
+// Secret channel unlock
 const secretSeq = [7,3,9,1];
 let inputBuf = [];
 
+// Retro channel strip / keypad
 const strip = document.getElementById('channelStrip');
+const channelButtons = [];
+const digits = [1,2,3,4,5,6,7,8,9,0];
 
 // Retro channel input
 let channelInput = '';
@@ -228,12 +218,26 @@ const SECRET_CHANNEL_NUMBER = 666;
 const CHANNEL_INPUT_MAX_DIGITS = String(Math.max(MAX_CHANNEL_NUMBER, SECRET_CHANNEL_NUMBER)).length; // 3
 const CHANNEL_INPUT_COMMIT_MS = 1100;
 
-// Balanced possession: micro-frame + cult mode scheduling
+// Micro-frame + cult mode
 let lastMicroFrameAt = 0;
 let microFrameUntil = 0;
 let lastCultAt = 0;
 let cultModeActive = false;
 let cultUntil = 0;
+
+// Video stability tracking (THIS is the fix)
+let videoLoadStartedAt = 0;    // ms
+let videoLastTime = 0;         // seconds
+let videoLastProgressAt = 0;   // ms
+let videoStallSince = 0;       // ms (0 = not stalling)
+let currentVideoSrc = '';
+
+function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+
+function smoothstep(edge0, edge1, x) {
+  const t = clamp01((x - edge0) / (edge1 - edge0));
+  return t * t * (3 - 2 * t);
+}
 
 function resetChannelInput() {
   channelInput = '';
@@ -254,13 +258,13 @@ function commitChannelInput() {
 
 function pushDigit(d) {
   if (!tvOn) return;
+
   ensureAudio();
   if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} }
 
   if (channelInput.length >= CHANNEL_INPUT_MAX_DIGITS) channelInput = '';
   channelInput += String(d);
 
-  // Track secret sequence
   inputBuf.push(d);
   if (inputBuf.length > 4) inputBuf.shift();
   if (inputBuf.length === 4 && inputBuf.every((v, i) => v === secretSeq[i])) {
@@ -271,9 +275,6 @@ function pushDigit(d) {
   channelInputTimer = setTimeout(() => commitChannelInput(), CHANNEL_INPUT_COMMIT_MS);
 }
 
-// Build keypad buttons 1..9 + 0
-const channelButtons = [];
-const digits = [1,2,3,4,5,6,7,8,9,0];
 digits.forEach(d => {
   const btn = document.createElement('button');
   btn.type = 'button';
@@ -285,9 +286,9 @@ digits.forEach(d => {
   channelButtons.push(btn);
 });
 
-function updateButtons(idx) {}
+function updateButtons() {}
 
-// Phosphor glow
+// Glow
 function setGlow(ch) {
   const { r, g, b } = ch;
   const brightness = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
@@ -299,15 +300,15 @@ function setGlow(ch) {
   `;
 }
 
-// Rounded rectangles
-function roundRect(ctx, x, y, w, h, r) {
+// Small helper for rounded rectangles
+function roundRect(ctx2, x, y, w, h, r) {
   const rr = Math.max(0, Math.min(r, Math.min(w, h) / 2));
-  ctx.moveTo(x + rr, y);
-  ctx.arcTo(x + w, y, x + w, y + h, rr);
-  ctx.arcTo(x + w, y + h, x, y + h, rr);
-  ctx.arcTo(x, y + h, x, y, rr);
-  ctx.arcTo(x, y, x + w, y, rr);
-  ctx.closePath();
+  ctx2.moveTo(x + rr, y);
+  ctx2.arcTo(x + w, y, x + w, y + h, rr);
+  ctx2.arcTo(x + w, y + h, x, y + h, rr);
+  ctx2.arcTo(x, y + h, x, y, rr);
+  ctx2.arcTo(x, y, x + w, y, rr);
+  ctx2.closePath();
 }
 
 // Noise buffer
@@ -326,38 +327,117 @@ function makeNoiseBuffer() {
   return off;
 }
 
-// Video setup per channel
-let currentVideoSrc = '';
+// Video load (robust)
+function resetVideoHealth(nowMs) {
+  videoLoadStartedAt = nowMs;
+  videoLastTime = 0;
+  videoLastProgressAt = nowMs;
+  videoStallSince = 0;
+}
+
 function loadVideoForChannel(ch) {
+  const nowMs = performance.now();
+  resetVideoHealth(nowMs);
+
   if (ch.type !== 'video') {
-    videoEl.pause();
+    try { videoEl.pause(); } catch {}
     videoEl.removeAttribute('src');
     currentVideoSrc = '';
     return;
   }
-  if (ch.src === currentVideoSrc) return;
+
   currentVideoSrc = ch.src;
 
-  videoEl.pause();
-  videoEl.muted = false;
-  videoEl.loop = false;
-  videoEl.playsInline = true;
+  try { videoEl.pause(); } catch {}
 
-  videoEl.src = ch.src;
-  const playAttempt = () => videoEl.play().catch(() => {});
-  videoEl.onloadedmetadata = playAttempt;
-  playAttempt();
+  try {
+    videoEl.loop = false;
+    videoEl.playsInline = true;
+    videoEl.muted = false;
+    videoEl.src = ch.src;
+    videoEl.currentTime = 0;
+    videoEl.load();
+  } catch {}
+
+  const playAttempt = () => {
+    videoEl.play().catch(() => {
+      // autoplay may be blocked until a gesture
+    });
+  };
+
+  videoEl.onloadedmetadata = () => {
+    resetVideoHealth(performance.now());
+    playAttempt();
+  };
+
+  // small extra attempt for cached metadata situations
+  setTimeout(playAttempt, 60);
+  setTimeout(playAttempt, 260);
 }
 
-// When a video ends, auto-advance if user isn't interacting.
+// Auto-next rules
 let lastUserActionAt = performance.now();
-videoEl.addEventListener('ended', () => {
+
+function safeAutoNext(reason) {
   if (!tvOn) return;
+  if (switching) return;
+
   const ch = CHANNELS[currentIdx];
   if (!ch || ch.type !== 'video') return;
-  if (switching) return;
-  if (performance.now() - lastUserActionAt < 2500) return;
+
+  // if user is typing digits, do not sabotage
+  if (channelInput && channelInput.length) return;
+
+  // do not chain multiple triggers in the same instant
+  const now = performance.now();
+  if (now - lastUserActionAt < 120) return;
+
   next();
+}
+
+// Video events (do not overreact)
+videoEl.addEventListener('timeupdate', () => {
+  const now = performance.now();
+  const t = videoEl.currentTime || 0;
+  if (t > videoLastTime + 0.01) {
+    videoLastTime = t;
+    videoLastProgressAt = now;
+    videoStallSince = 0;
+  }
+});
+
+videoEl.addEventListener('playing', () => {
+  const now = performance.now();
+  videoLastProgressAt = now;
+  videoStallSince = 0;
+});
+
+videoEl.addEventListener('ended', () => {
+  // Always go next when ended, unless user typing digits
+  safeAutoNext('ended');
+});
+
+videoEl.addEventListener('error', () => {
+  // If decode fails or file missing, do not freeze
+  staticBurst = Math.max(staticBurst, 1.0);
+  spikeAmp = Math.max(spikeAmp, 0.75);
+  setTimeout(() => safeAutoNext('error'), 220);
+});
+
+videoEl.addEventListener('stalled', () => {
+  // stalled can happen in normal buffering, do NOT skip immediately
+  const now = performance.now();
+  if (!videoStallSince) videoStallSince = now;
+
+  // try recover
+  try { videoEl.play(); } catch {}
+
+  // if it persists, watchdog will handle it (3+ seconds)
+});
+
+videoEl.addEventListener('waiting', () => {
+  const now = performance.now();
+  if (!videoStallSince) videoStallSince = now;
 });
 
 // AUDIO (Web Audio API)
@@ -372,7 +452,6 @@ let delayGain = null;
 let feedbackGain = null;
 
 let audioEnabled = false;
-let firstGestureSeen = false;
 
 function makeDistortionCurve(amount = 0) {
   const n = 2048;
@@ -387,8 +466,6 @@ function makeDistortionCurve(amount = 0) {
 
 function ensureAudio() {
   if (audioEnabled) return;
-
-  firstGestureSeen = true;
 
   try {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -432,24 +509,21 @@ function ensureAudio() {
     feedbackGain.gain.value = 0.0;
 
     audioEnabled = true;
-
     setVolumeStep(volumeStep, false);
-  } catch (e) {
+  } catch {
     audioEnabled = false;
   }
 }
 
-function setAudioMood(c, spikeAmp) {
+function setAudioMood(c, spike) {
   if (!audioEnabled || !audioCtx) return;
 
   const dark = c * c;
 
-  // IMPORTANT: keep it less "annoying"
-  // Cutoff stays higher than before, drive is gentler, wet/fb smaller
-  const cutoff = 18000 - dark * 11000;         // 18k -> 7k-ish
-  const drive  = Math.min(1, dark * 0.55 + spikeAmp * 0.75);
-  const wet    = Math.min(0.35, dark * 0.12 + spikeAmp * 0.30);
-  const fb     = Math.min(0.28, dark * 0.10 + spikeAmp * 0.22);
+  const cutoff = 18000 - dark * 11000;
+  const drive  = Math.min(1, dark * 0.55 + spike * 0.75);
+  const wet    = Math.min(0.35, dark * 0.12 + spike * 0.30);
+  const fb     = Math.min(0.28, dark * 0.10 + spike * 0.22);
 
   lpFilter.frequency.setTargetAtTime(cutoff, audioCtx.currentTime, 0.02);
   shaper.curve = makeDistortionCurve(drive);
@@ -463,39 +537,29 @@ function setAudioMood(c, spikeAmp) {
   if (videoEl && CHANNELS[currentIdx] && CHANNELS[currentIdx].type === 'video') {
     const baseRate = 1.0 - dark * 0.02;
     const wobble = (dark > 0.45 ? Math.sin(frameCount * 0.03) * (0.001 + dark * 0.003) : 0);
-    const spikeDrop = spikeAmp * 0.055;
+    const spikeDrop = spike * 0.055;
     const r = Math.max(0.88, Math.min(1.02, baseRate + wobble - spikeDrop));
     videoEl.playbackRate = r;
   }
-}
-
-// Helpers
-function clamp01(x) { return Math.max(0, Math.min(1, x)); }
-
-function smoothstep(edge0, edge1, x) {
-  const t = clamp01((x - edge0) / (edge1 - edge0));
-  return t * t * (3 - 2 * t);
 }
 
 // Distortion schedule
 function updateDistortion(dt) {
   timeAlive += dt;
 
-  // Start corruption earlier for live usefulness
+  // ramp earlier for live pacing
   const tTime = smoothstep(20, 180, timeAlive);
   const tSw   = smoothstep(8, 180, switchCount);
   corruption = clamp01(Math.max(tTime * 0.90, tSw * 0.75));
 
-  // Intensifies after 10 minutes
-  if (timeAlive > 600) {
-    corruption = clamp01(corruption + 0.0006);
-  }
+  if (timeAlive > 600) corruption = clamp01(corruption + 0.0006);
 
   distortionLevel = Math.floor(corruption * 3.2);
   distortionStrength = clamp01(corruption * 1.05);
 
   const lateBoost = smoothstep(0.75, 0.98, corruption);
   const mean = (18 - corruption * 11) - lateBoost * 2.4;
+
   spikeT += dt;
 
   if (spikeT >= nextSpikeAt) {
@@ -527,51 +591,48 @@ function updateDistortion(dt) {
     }
   }
 
-  // Auto-unlock 666 in extreme late game
-  if (!secretUnlocked && corruption > 0.93 && timeAlive > 320) {
-    unlockSecretChannel();
-  }
+  // Cult earlier (4 min), intensify after 6 min, then 10 min
+  updateCultMode(dt);
 
-  // Balanced Cult Mode
-  updateCultMode();
+  // auto unlock 666 very late
+  if (!secretUnlocked && corruption > 0.93 && timeAlive > 320) unlockSecretChannel();
 
   setAudioMood(corruption, spikeAmp);
 }
 
-// Balanced Cult Mode scheduling
-function updateCultMode() {
+function updateCultMode(dt) {
   const now = performance.now();
 
-  // Start around 8 minutes
-  if (timeAlive < 480) return;
-
-  // Cooldown 60s
-  if (now - lastCultAt < 60000) {
-    if (cultModeActive && now >= cultUntil) cultModeActive = false;
-    return;
-  }
-
-  // Chance increases after 10 minutes
-  const after10 = timeAlive >= 600;
-  const chance = after10 ? 0.012 : 0.008; // per second-ish, applied via frame roll
-  if (Math.random() < chance * (1 / 60)) {
-    lastCultAt = now;
-    cultModeActive = true;
-    cultUntil = now + (after10 ? 5200 : 3200);
-  }
+  // starts around 4 minutes (live pacing)
+  if (timeAlive < 240) return;
 
   if (cultModeActive && now >= cultUntil) cultModeActive = false;
+
+  // keep a cooldown so it is a "phase", not noise
+  if (now - lastCultAt < 32000) return;
+
+  const after6  = timeAlive >= 360;
+  const after10 = timeAlive >= 600;
+
+  const baseChance = after10 ? 0.10 : after6 ? 0.075 : 0.055;
+  if (Math.random() < baseChance * dt) {
+    lastCultAt = now;
+    cultModeActive = true;
+    const dur = after10 ? 7000 : after6 ? 5200 : 3400;
+    cultUntil = now + dur;
+  }
 }
 
+// Autonomy (possession does stuff even if active, becomes frequent later)
 function updateAutonomy(dt) {
   if (!tvOn) return;
 
   const now = performance.now();
   const idleMs = now - lastUserActionAt;
 
-  const late     = (timeAlive > 170 && corruption > 0.70);
-  const veryLate = (timeAlive > 260 && corruption > 0.82);
-  const ultra    = (timeAlive > 360 && corruption > 0.90);
+  const late     = (timeAlive > 150 && corruption > 0.68);
+  const veryLate = (timeAlive > 230 && corruption > 0.80);
+  const ultra    = (timeAlive > 320 && corruption > 0.88);
 
   if (!late) {
     nextAutonomyAt = now + 999999;
@@ -580,48 +641,46 @@ function updateAutonomy(dt) {
 
   if (now < nextAutonomyAt) return;
 
-  const activity = clamp01(idleMs / 9000);
+  const activity = clamp01(idleMs / 7000);
   const c = clamp01(corruption);
 
-  // More present even while active
-  const base = 0.03 + c * 0.07;
-  const idleBoost = activity * (0.020 + c * 0.060);
-  const lateBoost = veryLate ? 0.025 : 0.0;
-  const ultraBoost = ultra ? 0.040 : 0.0;
+  const base = 0.040 + c * 0.080;                  // baseline, even while active
+  const idleBoost = activity * (0.030 + c * 0.070);
+  const lateBoost = veryLate ? 0.030 : 0.0;
+  const ultraBoost = ultra ? 0.050 : 0.0;
 
   const chancePerSec = base + idleBoost + lateBoost + ultraBoost;
-  const roll = Math.random();
 
-  if (roll < chancePerSec * dt) {
+  if (Math.random() < chancePerSec * dt) {
     const r = Math.random();
 
-    if (ultra && r < 0.12) {
+    if (ultra && r < 0.14) {
       triggerStinger();
-    } else if ((veryLate || ultra) && r < (ultra ? 0.24 : 0.14)) {
+    } else if ((veryLate || ultra) && r < (ultra ? 0.30 : 0.18)) {
       triggerPowerBlink();
-    } else if ((veryLate || ultra) && r < (ultra ? 0.46 : 0.30)) {
+    } else if ((veryLate || ultra) && r < (ultra ? 0.52 : 0.38)) {
       const msgs = ['YOU WERE HERE', 'STAY', 'NO SIGNAL', 'DO NOT SWITCH'];
       startFreezeHit(msgs[(Math.random() * msgs.length) | 0]);
-    } else if ((veryLate || ultra) && r < (ultra ? 0.66 : 0.48)) {
+    } else if ((veryLate || ultra) && r < (ultra ? 0.72 : 0.56)) {
       startPossessedTyping(SECRET_CHANNEL_NUMBER);
-    } else if (r < (ultra ? 0.82 : veryLate ? 0.78 : 0.66)) {
+    } else if (r < (ultra ? 0.86 : veryLate ? 0.80 : 0.72)) {
       const maxHop = ultra ? 6 : veryLate ? 4 : 2;
       const hop = (Math.random() < 0.5 ? -1 : 1) * (1 + ((Math.random() * maxHop) | 0));
       resetChannelInput();
       switchTo(currentIdx + hop);
-    } else if (r < (ultra ? 0.92 : veryLate ? 0.90 : 0.86)) {
+    } else if (r < (ultra ? 0.94 : veryLate ? 0.92 : 0.88)) {
       const delta = (Math.random() < 0.55 ? 1 : -1) * (ultra ? 2 : 1);
       setVolumeStep(volumeStep + delta);
     } else {
-      spikeAmp = Math.max(spikeAmp, 0.55 + (veryLate ? 0.22 : 0.08) + (ultra ? 0.10 : 0));
+      spikeAmp = Math.max(spikeAmp, 0.60 + (veryLate ? 0.22 : 0.10) + (ultra ? 0.12 : 0));
       staticBurst = Math.max(staticBurst, 1.0);
     }
 
-    const baseMs = ultra ? 1300 : veryLate ? 2200 : 3600;
-    const jitter = (Math.random() - 0.5) * (ultra ? 800 : veryLate ? 1200 : 1800);
-    nextAutonomyAt = now + Math.max(750, baseMs + jitter);
+    const baseMs = ultra ? 900 : veryLate ? 1500 : 2400;
+    const jitter = (Math.random() - 0.5) * (ultra ? 500 : veryLate ? 800 : 1100);
+    nextAutonomyAt = now + Math.max(650, baseMs + jitter);
   } else {
-    nextAutonomyAt = now + (ultra ? 250 : 450);
+    nextAutonomyAt = now + (ultra ? 220 : 360);
   }
 }
 
@@ -649,13 +708,12 @@ function triggerPowerBlink() {
     switching = false;
   }, 450);
 
-  setHardCooldown(2200);
+  setHardCooldown(1800);
 }
 
 function startFreezeHit(text) {
   if (!canDoHardScare()) return;
 
-  // Capture a real freeze frame from the current video
   if (CHANNELS[currentIdx] && CHANNELS[currentIdx].type === 'video' && videoEl.readyState >= 2) {
     try {
       freezeFrame.width = CW;
@@ -676,7 +734,7 @@ function startFreezeHit(text) {
   scareFlash = Math.max(scareFlash, 0.85);
   scareHold = Math.max(scareHold, 0.12);
 
-  setHardCooldown(2600);
+  setHardCooldown(2200);
 }
 
 function endFreezeIfNeeded(now) {
@@ -712,7 +770,6 @@ function tickPossessedTyping() {
   const now = performance.now();
   if (now < possessedNextTypeAt) return;
 
-  // If user is typing, back off.
   if (channelInput.length > 0) {
     possessedNextTypeAt = now + 650;
     return;
@@ -728,9 +785,7 @@ function tickPossessedTyping() {
     possessedNextTypeAt = now + 380;
     possessedAttempts++;
     commitChannelInput();
-    if (possessedAttempts >= 2) {
-      stopPossessedTyping();
-    }
+    if (possessedAttempts >= 2) stopPossessedTyping();
   }
 }
 
@@ -747,7 +802,7 @@ function triggerStinger() {
 
   setTimeout(() => startPossessedTyping(SECRET_CHANNEL_NUMBER), 180);
 
-  setHardCooldown(4200);
+  setHardCooldown(3200);
 }
 
 // Visual effects
@@ -879,7 +934,7 @@ function drawHauntOverlay(strength, spike) {
   ctx.globalCompositeOperation = 'multiply';
 
   const vg = ctx.createRadialGradient(w/2, h/2, Math.min(w,h)*0.15, w/2, h/2, Math.min(w,h)*0.75);
-  vg.addColorStop(0, `rgba(120,0,0,${0.0})`);
+  vg.addColorStop(0, `rgba(120,0,0,0)`);
   vg.addColorStop(1, `rgba(160,0,0,${redA})`);
   ctx.fillStyle = vg;
   ctx.fillRect(0, 0, w, h);
@@ -912,24 +967,23 @@ function drawHauntOverlay(strength, spike) {
   }
 }
 
-// Micro-frame (subliminal)
+// Micro-frame
 function maybeDrawMicroFrame() {
   const now = performance.now();
+
   if (now < microFrameUntil) {
     drawMicroFrameOverlay();
     return;
   }
 
-  // Cooldown 30s
-  if (now - lastMicroFrameAt < 30000) return;
+  const minGap = timeAlive > 360 ? 13000 : 20000;
+  if (now - lastMicroFrameAt < minGap) return;
+  if (corruption < 0.58) return;
 
-  if (corruption < 0.62) return;
-
-  // Rare, scales with corruption
-  const p = 0.00025 + clamp01((corruption - 0.62) / 0.38) * 0.0010; // about 0.025% -> 0.125% per frame
+  const p = 0.0028 + clamp01((corruption - 0.58) / 0.42) * 0.0060;
   if (Math.random() < p) {
     lastMicroFrameAt = now;
-    microFrameUntil = now + (Math.random() < 0.25 ? 34 : 17); // 1 or 2 frames
+    microFrameUntil = now + (Math.random() < 0.25 ? 34 : 17);
     drawMicroFrameOverlay();
   }
 }
@@ -963,7 +1017,6 @@ function drawCultModeOverlay() {
 
   const w = CW / DPR, h = CH / DPR;
 
-  // Reduce noise vibe, more "presence"
   ctx.globalCompositeOperation = 'multiply';
   ctx.fillStyle = 'rgba(110, 0, 0, 0.30)';
   ctx.fillRect(0, 0, w, h);
@@ -1003,18 +1056,13 @@ function drawChannelLabel(ch, osdInput) {
 
   let labelText = `CH ${labelNum}${cursor}`;
 
-  // OSD corruption: intermittent, subtle
-  if (corruption > 0.65 && Math.random() < 0.08) {
-    labelText = labelText
-      .replace(/0/g, 'O')
-      .replace(/1/g, 'I');
-
+  if (corruption > 0.55 && Math.random() < (0.08 + corruption * 0.12)) {
+    labelText = labelText.replace(/0/g, 'O').replace(/1/g, 'I');
     if (corruption > 0.82 && Math.random() < 0.25) {
       labelText = labelText.replace(/6/g, (Math.random() < 0.5 ? '9' : 'G'));
     }
   }
 
-  // Rare hard corruption: flashes as 666 briefly
   if (corruption > 0.86 && Math.random() < 0.012) {
     labelText = `CH 666${cursor}`;
   }
@@ -1177,11 +1225,9 @@ function drawChannel(ch) {
     return;
   }
 
-  // Base
   ctx.fillStyle = ch.hex;
   ctx.fillRect(0, 0, CW, CH);
 
-  // Video: use captured freeze frame if frozen
   if (ch.type === 'video' && videoEl.readyState >= 2) {
     if (nowMs < freezeUntil && freezeFrame.width === CW && freezeFrame.height === CH) {
       ctx.drawImage(freezeFrame, 0, 0, CW, CH);
@@ -1190,7 +1236,6 @@ function drawChannel(ch) {
     }
   }
 
-  // CRT flavor
   drawVignette();
   drawPhosphorWarmth(ch);
   drawScanBand();
@@ -1207,7 +1252,6 @@ function drawChannel(ch) {
   drawChannelLabel(ch, channelInput);
   drawVolumeOSD();
 
-  // Possession overlays
   const nowO = performance.now();
 
   if (nowO < stingerUntil) {
@@ -1267,13 +1311,10 @@ function drawChannel(ch) {
     drawHauntOverlay(base, spike);
   }
 
-  // Cult Mode sits on top, then micro-frame can punch through for 1 frame
   drawCultModeOverlay();
   maybeDrawMicroFrame();
 
   const staticAlpha = clamp01(staticBurst + spike * 0.55) * (0.42 + base * 0.22);
-
-  // Cult Mode reduces static a bit
   drawStatic(cultModeActive ? staticAlpha * 0.45 : staticAlpha);
 }
 
@@ -1288,6 +1329,7 @@ function switchTo(idx) {
   currentIdx = ((idx % CHANNELS.length) + CHANNELS.length) % CHANNELS.length;
 
   updateButtons(currentIdx);
+
   const ch = CHANNELS[currentIdx];
   setGlow(ch);
   loadVideoForChannel(ch);
@@ -1322,15 +1364,15 @@ function prev() {
 // Input
 document.getElementById('nextKnob').addEventListener('click', next);
 document.getElementById('prevKnob').addEventListener('click', prev);
+
 tvScreen.addEventListener('click', () => {
-  if (tvOn) {
-    ensureAudio();
-    if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} }
-    next();
-  }
+  if (!tvOn) return;
+  ensureAudio();
+  if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch {} }
+  next();
 });
 
-// Volume button
+// Volume
 if (volBtn) {
   volBtn.addEventListener('click', (e) => {
     lastUserActionAt = performance.now();
@@ -1343,7 +1385,7 @@ if (volBtn) {
   }, { passive: false });
 }
 
-// Power button
+// Power
 if (powerBtn) powerBtn.addEventListener('click', togglePower);
 
 // Keyboard
@@ -1362,23 +1404,15 @@ document.addEventListener('keydown', e => {
     return;
   }
 
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    commitChannelInput();
-    return;
-  }
-  if (e.key === 'Escape') {
-    e.preventDefault();
-    resetChannelInput();
-    return;
-  }
+  if (e.key === 'Enter') { e.preventDefault(); commitChannelInput(); return; }
+  if (e.key === 'Escape') { e.preventDefault(); resetChannelInput(); return; }
+
   if (e.key === 'Backspace') {
     e.preventDefault();
     if (channelInput.length) {
       channelInput = channelInput.slice(0, -1);
-      if (!channelInput.length) {
-        resetChannelInput();
-      } else {
+      if (!channelInput.length) resetChannelInput();
+      else {
         if (channelInputTimer) clearTimeout(channelInputTimer);
         channelInputTimer = setTimeout(() => commitChannelInput(), CHANNEL_INPUT_COMMIT_MS);
       }
@@ -1393,14 +1427,8 @@ document.addEventListener('keydown', e => {
   if (e.key === '+' || e.key === '=' ) { e.preventDefault(); bumpVolume(+1); return; }
   if (e.key === '-' || e.key === '_' ) { e.preventDefault(); bumpVolume(-1); return; }
 
-  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowUp') {
-    e.preventDefault();
-    next();
-  }
-  if (e.key === 'ArrowLeft'  || e.key === 'ArrowDown') {
-    e.preventDefault();
-    prev();
-  }
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowUp') { e.preventDefault(); next(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowDown') { e.preventDefault(); prev(); }
 });
 
 window.addEventListener('scroll', () => { lastUserActionAt = performance.now(); }, { passive: true });
@@ -1432,6 +1460,51 @@ function unlockSecretChannel() {
   staticBurst = 1.0;
 }
 
+// Watchdog: end and stall detection WITHOUT random skips
+function watchdogVideo(nowMs) {
+  const ch = CHANNELS[currentIdx];
+  if (!tvOn || !ch || ch.type !== 'video') return;
+  if (switching) return;
+
+  // If ended flag true, go next
+  if (videoEl.ended) {
+    safeAutoNext('watchdog-ended');
+    return;
+  }
+
+  // If metadata never loads for too long, go next
+  if (videoEl.readyState < 2) {
+    if (nowMs - videoLoadStartedAt > 6500) {
+      safeAutoNext('watchdog-no-decode');
+    }
+    return;
+  }
+
+  const dur = videoEl.duration || 0;
+  const t = videoEl.currentTime || 0;
+
+  // If it is basically at the end and paused, go next (covers browsers that fail ended)
+  if (dur > 0.5 && t >= dur - 0.08 && (videoEl.paused || videoEl.currentTime === videoLastTime)) {
+    safeAutoNext('watchdog-near-end');
+    return;
+  }
+
+  // Stall detection: if no progress for 3.2s while not paused, go next
+  if (!videoEl.paused) {
+    const noProgressMs = nowMs - videoLastProgressAt;
+    if (noProgressMs > 3200) {
+      safeAutoNext('watchdog-stall');
+      return;
+    }
+  }
+
+  // If buffering state persists for too long, go next
+  if (videoStallSince && (nowMs - videoStallSince > 3600)) {
+    safeAutoNext('watchdog-buffer-stuck');
+    return;
+  }
+}
+
 // Init
 setGlow(CHANNELS[currentIdx]);
 loadVideoForChannel(CHANNELS[currentIdx]);
@@ -1446,22 +1519,18 @@ function loop(now) {
 
   updateDistortion(dt);
   updateAutonomy(dt);
-
-  // IMPORTANT: possessed typing must be ticked every frame
   tickPossessedTyping();
-
   endFreezeIfNeeded(now);
 
-  if (scareHold > 0) {
-    scareHold -= dt;
-  } else {
-    scareFlash = scareFlash > 0.001 ? scareFlash * 0.78 : 0;
-  }
+  // decay scare flash
+  if (scareHold > 0) scareHold -= dt;
+  else scareFlash = scareFlash > 0.001 ? scareFlash * 0.78 : 0;
 
   staticBurst = staticBurst > 0.01 ? staticBurst * 0.82 : 0;
 
-  drawChannel(CHANNELS[currentIdx]);
+  watchdogVideo(now);
 
+  drawChannel(CHANNELS[currentIdx]);
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
