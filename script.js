@@ -42,6 +42,17 @@ const CHANNELS = [
   { ch: 37, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight',    src:'./assets/videos/clip-37.mp4' },
   { ch: 38, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight',    src:'./assets/videos/clip-38.mp4' },
   { ch: 39, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight',    src:'./assets/videos/clip-39.mp4' },
+  { ch: 40, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-40.mp4' },
+  { ch: 41, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-41.mp4' },
+  { ch: 42, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-42.mp4' },
+  { ch: 43, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment',      src:'./assets/videos/clip-43.mp4' },
+  { ch: 44, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-44.mp4' },
+  { ch: 45, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-45.mp4' },
+  { ch: 46, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-46.mp4' },
+  { ch: 47, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom',  src:'./assets/videos/clip-47.mp4' },
+  { ch: 48, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom',  src:'./assets/videos/clip-48.mp4' },
+  { ch: 49, type: 'video', name: 'Room',  hex: '#6b7f8e', r:107, g:127, b:142, desc:'still laughing',         src:'./assets/videos/clip-49.mp4' },
+  { ch: 50, type: 'video', name: 'Room',  hex: '#ee0404', r:107, g:127, b:142, desc:'still laughing',         src:'./assets/videos/clip-50.mp4' },
 ];
 
 const tvScreen = document.getElementById('tvScreen');
