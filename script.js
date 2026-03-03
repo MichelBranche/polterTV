@@ -53,6 +53,16 @@ const CHANNELS = [
   { ch: 48, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom',  src:'./assets/videos/clip-48.mp4' },
   { ch: 49, type: 'video', name: 'Room',  hex: '#6b7f8e', r:107, g:127, b:142, desc:'still laughing',         src:'./assets/videos/clip-49.mp4' },
   { ch: 50, type: 'video', name: 'Room',  hex: '#ee0404', r:107, g:127, b:142, desc:'still laughing',         src:'./assets/videos/clip-50.mp4' },
+  { ch: 51, type: 'video', name: 'Room',  hex: '#ee0404', r:107, g:127, b:142, desc:'still laughing',         src:'./assets/videos/clip-51.mp4' },
+  { ch: 52, type: 'video', name: 'Room',  hex: '#6b7f8e', r:107, g:127, b:142, desc:'still laughing',         src:'./assets/videos/clip-52.mp4' },
+  { ch: 53, type: 'video', name: 'Room',  hex: '#6b7f8e', r:107, g:127, b:142, desc:'still laughing',         src:'./assets/videos/clip-53.mp4' },
+  { ch: 54, type: 'video', name: 'Room',  hex: '#6b7f8e', r:107, g:127, b:142, desc:'still laughing',         src:'./assets/videos/clip-54.mp4' },
+  { ch: 55, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom',  src:'./assets/videos/clip-55.mp4' },
+  { ch: 56, type: 'video', name: 'Petal', hex: '#d4a5a0', r:212, g:165, b:160, desc:'wild rose, last bloom',  src:'./assets/videos/clip-56.mp4' },
+  { ch: 57, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-57.mp4' },
+  { ch: 58, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-58.mp4' },
+  { ch: 59, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-59.mp4' },
+  { ch: 60, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-60.mp4' },
 ];
 
 const tvScreen = document.getElementById('tvScreen');
