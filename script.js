@@ -1040,7 +1040,7 @@ function drawCultModeOverlay() {
   ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(0,0,0,0.9)';
   ctx.shadowBlur = 10;
-  ctx.fillText('THE BROADCAST WAS NEVER OFF.', w / 2, h * 0.56);
+  ctx.fillText('', w / 2, h * 0.56);
 
   ctx.restore();
 }
