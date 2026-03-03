@@ -7,7 +7,7 @@ const CHANNELS = [
   { ch:  1, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment',      src:'./assets/videos/clip-01.mp4' },
   { ch:  2, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment',      src:'./assets/videos/clip-02.mp4' },
   { ch:  3, type: 'video', name: 'Room',  hex: '#6b7f8e', r:107, g:127, b:142, desc:'still laughing',         src:'./assets/videos/clip-03.mp4' },
-  { ch:  4, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight',    src:'./assets/videos/clip-01.mp4' },
+  { ch:  4, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight',    src:'./assets/videos/clip-04.mp4' },
   { ch:  5, type: 'video', name: 'Echo',  hex: '#4a5e45', r:74,  g:94,  b:69,  desc:'replay drift',           src:'./assets/videos/clip-05.mp4' },
   { ch:  6, type: 'video', name: 'Clay',  hex: '#9c7c5e', r:156, g:124, b:94,  desc:'exposed earth',          src:'./assets/videos/clip-06.mp4' },
   { ch:  7, type: 'video', name: 'Ochre', hex: '#c4893a', r:196, g:137, b:58,  desc:'amber before the storm', src:'./assets/videos/clip-07.mp4' },
