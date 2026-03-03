@@ -3,7 +3,8 @@
 // Fix: no random early autoskips, robust end detection, robust stall recovery
 
 const CHANNELS = [
-  { ch:  1, type: 'color', name: 'POLTERTV', hex: '#18b507cb', r:26, g:24, b:20, desc:'OR THE LIFE IF U PREFER' },
+  { ch:  0, type: 'color', name: 'POLTERTV', hex: '#18b507cb', r:26, g:24, b:20, desc:'OR THE LIFE IF U PREFER' },
+  { ch:  1, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment',      src:'./assets/videos/clip-01.mp4' },
   { ch:  2, type: 'video', name: 'Tape',  hex: '#2e3d4f', r:46,  g:61,  b:79,  desc:'archive fragment',      src:'./assets/videos/clip-02.mp4' },
   { ch:  3, type: 'video', name: 'Room',  hex: '#6b7f8e', r:107, g:127, b:142, desc:'still laughing',         src:'./assets/videos/clip-03.mp4' },
   { ch:  4, type: 'video', name: 'Rain',  hex: '#8fafc2', r:143, g:175, b:194, desc:'the sky at midnight',    src:'./assets/videos/clip-01.mp4' },
