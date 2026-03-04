@@ -1,6 +1,7 @@
 // After Sign-Off: Interference
 // Canvas CRT + video channels + progressive corruption + possession behaviors
-// Fix: no random early autoskips, robust end detection, robust stall recovery
+// Performance fix: reuse offscreen buffers, cache overlays, avoid per-frame allocations,
+// avoid getImageData/putImageData, adaptive quality for mobile, pause on hidden tab.
 
 const CHANNELS = [
   { ch:  0, type: 'color', name: 'POLTERTV', hex: '#18b507cb', r:26, g:24, b:20, desc:'OR THE LIFE IF U PREFER' },
@@ -68,32 +69,143 @@ const CHANNELS = [
 
 const tvScreen = document.getElementById('tvScreen');
 const canvas   = document.getElementById('screen');
-const ctx      = canvas.getContext('2d', { alpha: false });
+const ctx      = canvas.getContext('2d', { alpha: false, desynchronized: true });
 const glow     = document.getElementById('glow');
 const videoEl  = document.getElementById('srcVideo');
 
 let CW, CH, DPR;
+
+// Performance knobs (adaptive)
+const PERF = {
+  // hard clamp for DPR, then adaptive can reduce further
+  dprMax: 2,
+  dprMin: 1,
+  // mobile baseline quality bias
+  mobileBias: 0.85,
+  // if frame time average goes above this, we drop quality
+  slowMs: 24,
+  // if frame time average goes below this for a while, we can raise quality
+  fastMs: 16.5,
+  // how aggressive
+  adjustCooldownMs: 900,
+};
+
+const isMobile = matchMedia('(max-width: 640px)').matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+// Adaptive state
+let quality = isMobile ? 0.85 : 1.0; // 0.6..1.0
+let avgFrameMs = 16.7;
+let lastQualityAdjustAt = 0;
+
+// Cached overlays (huge win on mobile)
+let vignetteCache = null;       // canvas
+let warmthCache = new Map();    // key: chNum + size + dpr -> canvas
+
+// FX scratch buffers reused (huge win)
+const fx = {
+  buf: document.createElement('canvas'),
+  bctx: null,
+  bufReady: false,
+};
+fx.bctx = fx.buf.getContext('2d', { alpha: false, desynchronized: true });
+
+// Noise buffer at reduced res, reused
+const noise = {
+  canvas: document.createElement('canvas'),
+  nctx: null,
+  age: 0,
+  scale: 0.5, // 0.5 => quarter pixels
+};
+noise.nctx = noise.canvas.getContext('2d', { alpha: false, desynchronized: true });
+
+function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+
 function resizeCanvas() {
   const rect = tvScreen.getBoundingClientRect();
-  DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+
+  const base = window.devicePixelRatio || 1;
+  const maxDpr = Math.max(PERF.dprMin, Math.min(PERF.dprMax, base));
+  // adaptive DPR
+  const adaptive = Math.max(PERF.dprMin, Math.min(maxDpr, maxDpr * quality));
+  DPR = adaptive;
+
   CW = Math.floor(rect.width * DPR);
   CH = Math.floor(rect.height * DPR);
+
   canvas.width  = CW;
   canvas.height = CH;
   canvas.style.width  = rect.width + 'px';
   canvas.style.height = rect.height + 'px';
+
+  // reset transforms
   ctx.setTransform(1,0,0,1,0,0);
+
+  // resize fx buffer
+  fx.buf.width = CW;
+  fx.buf.height = CH;
+  fx.bufReady = false;
+
+  // resize noise buffer (reduced)
+  noise.canvas.width = Math.max(1, Math.floor(CW * noise.scale));
+  noise.canvas.height = Math.max(1, Math.floor(CH * noise.scale));
+  noise.age = 9999; // force regen
+
+  // rebuild overlays
+  buildVignetteCache();
+  warmthCache.clear();
 }
 resizeCanvas();
+
 window.addEventListener('resize', () => {
   clearTimeout(resizeCanvas._t);
-  resizeCanvas._t = setTimeout(resizeCanvas, 100);
+  resizeCanvas._t = setTimeout(resizeCanvas, 120);
 });
+
+// Cache: vignette overlay
+function buildVignetteCache() {
+  const off = document.createElement('canvas');
+  off.width = CW;
+  off.height = CH;
+  const oc = off.getContext('2d', { alpha: true });
+
+  const vg = oc.createRadialGradient(CW/2, CH/2, CH*0.10, CW/2, CH/2, CH*0.72);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,0.38)');
+
+  oc.fillStyle = vg;
+  oc.fillRect(0, 0, CW, CH);
+
+  vignetteCache = off;
+}
+
+// Cache: phosphor warmth overlay per channel (depends on color and size)
+function getWarmthOverlay(ch) {
+  const key = `${ch.ch}|${CW}|${CH}|${Math.round(DPR*100)}`;
+  const hit = warmthCache.get(key);
+  if (hit) return hit;
+
+  const off = document.createElement('canvas');
+  off.width = CW;
+  off.height = CH;
+  const oc = off.getContext('2d', { alpha: true });
+
+  const { r, g, b } = ch;
+  const luma = (r*0.299 + g*0.587 + b*0.114) / 255;
+  const a  = 0.10 + luma * 0.14;
+
+  const pg = oc.createRadialGradient(CW/2, CH/2, 0, CW/2, CH/2, CH*0.55);
+  pg.addColorStop(0, `rgba(255,255,255,${a})`);
+  pg.addColorStop(1, 'rgba(255,255,255,0)');
+
+  oc.fillStyle = pg;
+  oc.fillRect(0, 0, CW, CH);
+
+  warmthCache.set(key, off);
+  return off;
+}
 
 // State
 let currentIdx   = 0;
-let staticNoise  = null;
-let noiseAge     = 0;
 let staticBurst  = 0;
 let switching    = false;
 let scanOffset   = 0;
@@ -221,7 +333,7 @@ let stingerUntil = 0;
 
 // Freeze-frame buffer
 const freezeFrame = document.createElement('canvas');
-const freezeFrameCtx = freezeFrame.getContext('2d', { alpha: false });
+const freezeFrameCtx = freezeFrame.getContext('2d', { alpha: false, desynchronized: true });
 
 // Secret channel unlock
 const secretSeq = [7,3,9,1];
@@ -247,14 +359,12 @@ let lastCultAt = 0;
 let cultModeActive = false;
 let cultUntil = 0;
 
-// Video stability tracking (THIS is the fix)
+// Video stability tracking
 let videoLoadStartedAt = 0;    // ms
 let videoLastTime = 0;         // seconds
 let videoLastProgressAt = 0;   // ms
 let videoStallSince = 0;       // ms (0 = not stalling)
 let currentVideoSrc = '';
-
-function clamp01(x) { return Math.max(0, Math.min(1, x)); }
 
 function smoothstep(edge0, edge1, x) {
   const t = clamp01((x - edge0) / (edge1 - edge0));
@@ -333,20 +443,20 @@ function roundRect(ctx2, x, y, w, h, r) {
   ctx2.closePath();
 }
 
-// Noise buffer
-function makeNoiseBuffer() {
-  const off = document.createElement('canvas');
-  off.width = CW; off.height = CH;
-  const oc = off.getContext('2d');
-  const id = oc.createImageData(CW, CH);
-  const d  = id.data;
+// Noise buffer at reduced res (fast)
+function regenNoise() {
+  const w = noise.canvas.width;
+  const h = noise.canvas.height;
+  const nctx = noise.nctx;
+  const id = nctx.createImageData(w, h);
+  const d = id.data;
+
   for (let i = 0; i < d.length; i += 4) {
     const v = (Math.random() * 255) | 0;
     d[i] = d[i+1] = d[i+2] = v;
     d[i+3] = 255;
   }
-  oc.putImageData(id, 0, 0);
-  return off;
+  nctx.putImageData(id, 0, 0);
 }
 
 // Video load (robust)
@@ -357,14 +467,20 @@ function resetVideoHealth(nowMs) {
   videoStallSince = 0;
 }
 
+function hardReleaseVideo() {
+  // helps mobile decoders free resources
+  try { videoEl.pause(); } catch {}
+  try { videoEl.removeAttribute('src'); } catch {}
+  try { videoEl.load(); } catch {}
+  currentVideoSrc = '';
+}
+
 function loadVideoForChannel(ch) {
   const nowMs = performance.now();
   resetVideoHealth(nowMs);
 
   if (ch.type !== 'video') {
-    try { videoEl.pause(); } catch {}
-    videoEl.removeAttribute('src');
-    currentVideoSrc = '';
+    hardReleaseVideo();
     return;
   }
 
@@ -376,6 +492,9 @@ function loadVideoForChannel(ch) {
     videoEl.loop = false;
     videoEl.playsInline = true;
     videoEl.muted = false;
+    videoEl.preload = 'metadata';
+
+    // Important: set src only once, reset currentTime, then load.
     videoEl.src = ch.src;
     videoEl.currentTime = 0;
     videoEl.load();
@@ -392,7 +511,6 @@ function loadVideoForChannel(ch) {
     playAttempt();
   };
 
-  // small extra attempt for cached metadata situations
   setTimeout(playAttempt, 60);
   setTimeout(playAttempt, 260);
 }
@@ -407,17 +525,15 @@ function safeAutoNext(reason) {
   const ch = CHANNELS[currentIdx];
   if (!ch || ch.type !== 'video') return;
 
-  // if user is typing digits, do not sabotage
   if (channelInput && channelInput.length) return;
 
-  // do not chain multiple triggers in the same instant
   const now = performance.now();
   if (now - lastUserActionAt < 120) return;
 
   next();
 }
 
-// Video events (do not overreact)
+// Video events
 videoEl.addEventListener('timeupdate', () => {
   const now = performance.now();
   const t = videoEl.currentTime || 0;
@@ -434,27 +550,18 @@ videoEl.addEventListener('playing', () => {
   videoStallSince = 0;
 });
 
-videoEl.addEventListener('ended', () => {
-  // Always go next when ended, unless user typing digits
-  safeAutoNext('ended');
-});
+videoEl.addEventListener('ended', () => safeAutoNext('ended'));
 
 videoEl.addEventListener('error', () => {
-  // If decode fails or file missing, do not freeze
   staticBurst = Math.max(staticBurst, 1.0);
   spikeAmp = Math.max(spikeAmp, 0.75);
   setTimeout(() => safeAutoNext('error'), 220);
 });
 
 videoEl.addEventListener('stalled', () => {
-  // stalled can happen in normal buffering, do NOT skip immediately
   const now = performance.now();
   if (!videoStallSince) videoStallSince = now;
-
-  // try recover
   try { videoEl.play(); } catch {}
-
-  // if it persists, watchdog will handle it (3+ seconds)
 });
 
 videoEl.addEventListener('waiting', () => {
@@ -569,7 +676,6 @@ function setAudioMood(c, spike) {
 function updateDistortion(dt) {
   timeAlive += dt;
 
-  // ramp earlier for live pacing
   const tTime = smoothstep(20, 180, timeAlive);
   const tSw   = smoothstep(8, 180, switchCount);
   corruption = clamp01(Math.max(tTime * 0.90, tSw * 0.75));
@@ -613,10 +719,8 @@ function updateDistortion(dt) {
     }
   }
 
-  // Cult earlier (4 min), intensify after 6 min, then 10 min
   updateCultMode(dt);
 
-  // auto unlock 666 very late
   if (!secretUnlocked && corruption > 0.93 && timeAlive > 320) unlockSecretChannel();
 
   setAudioMood(corruption, spikeAmp);
@@ -625,12 +729,10 @@ function updateDistortion(dt) {
 function updateCultMode(dt) {
   const now = performance.now();
 
-  // starts around 4 minutes (live pacing)
   if (timeAlive < 240) return;
 
   if (cultModeActive && now >= cultUntil) cultModeActive = false;
 
-  // keep a cooldown so it is a "phase", not noise
   if (now - lastCultAt < 32000) return;
 
   const after6  = timeAlive >= 360;
@@ -645,7 +747,7 @@ function updateCultMode(dt) {
   }
 }
 
-// Autonomy (possession does stuff even if active, becomes frequent later)
+// Autonomy
 function updateAutonomy(dt) {
   if (!tvOn) return;
 
@@ -666,7 +768,7 @@ function updateAutonomy(dt) {
   const activity = clamp01(idleMs / 7000);
   const c = clamp01(corruption);
 
-  const base = 0.040 + c * 0.080;                  // baseline, even while active
+  const base = 0.040 + c * 0.080;
   const idleBoost = activity * (0.030 + c * 0.070);
   const lateBoost = veryLate ? 0.030 : 0.0;
   const ultraBoost = ultra ? 0.050 : 0.0;
@@ -838,84 +940,106 @@ function applyFlicker(strength) {
   }
 }
 
+// Prepare reusable FX buffer (copy current frame once)
+function ensureFxBufferCopied() {
+  if (!fx.bufReady) {
+    fx.bctx.setTransform(1,0,0,1,0,0);
+    fx.bctx.globalAlpha = 1;
+    fx.bctx.globalCompositeOperation = 'source-over';
+    fx.bctx.drawImage(canvas, 0, 0);
+    fx.bufReady = true;
+  }
+}
+
+// Shear without getImageData (fast path)
 function applyShear(strength) {
   if (strength <= 0) return;
-  const p = 0.05 + strength * 0.28;
-  if (Math.random() > p) return;
+
+  // On low quality, skip shear more often
+  const chance = (0.05 + strength * 0.28) * quality;
+  if (Math.random() > chance) return;
+
+  ensureFxBufferCopied();
 
   const bandH = Math.floor(CH * (0.02 + Math.random() * (0.05 + strength * 0.05)));
   const y = Math.floor(Math.random() * Math.max(1, (CH - bandH)));
   const dx = Math.floor((Math.random() - 0.5) * CW * (0.01 + strength * 0.06));
 
-  const img = ctx.getImageData(0, y, CW, bandH);
-  ctx.putImageData(img, dx, y);
+  // Copy band from buffer to screen shifted
+  ctx.drawImage(fx.buf, 0, y, CW, bandH, dx, y, CW, bandH);
 
+  // Fill exposed gap to hide edges
   ctx.fillStyle = 'rgba(0,0,0,0.10)';
   if (dx > 0) ctx.fillRect(0, y, dx, bandH);
   else ctx.fillRect(CW + dx, y, -dx, bandH);
 }
 
+// RGB split using same FX buffer, no new canvas per frame
 function applyRgbSplit(strength) {
   if (strength <= 0) return;
 
-  const off = document.createElement('canvas');
-  off.width = CW; off.height = CH;
-  const oc = off.getContext('2d');
-  oc.drawImage(canvas, 0, 0);
+  // reduce on mobile when quality drops
+  const s = strength * (0.75 + 0.25 * quality);
+  if (s < 0.08) return;
 
-  const shift = Math.floor((1 + Math.random() * 2) * (0.8 + strength * 3.2)) * DPR;
+  ensureFxBufferCopied();
 
-  ctx.globalAlpha = 0.18 + strength * 0.22;
+  const shift = Math.floor((1 + Math.random() * 2) * (0.8 + s * 3.2)) * Math.max(1, Math.floor(DPR));
+
+  ctx.globalAlpha = 0.16 + s * 0.20;
   ctx.globalCompositeOperation = 'screen';
-  ctx.drawImage(off, -shift, 0);
-  ctx.drawImage(off, shift, 0);
+  ctx.drawImage(fx.buf, -shift, 0);
+  ctx.drawImage(fx.buf, shift, 0);
 
-  if (strength > 0.55 && Math.random() < 0.25) {
-    const vy = Math.floor((Math.random() - 0.5) * (6 + strength * 10)) * DPR;
-    ctx.drawImage(off, 0, vy);
+  if (s > 0.55 && Math.random() < 0.22 * quality) {
+    const vy = Math.floor((Math.random() - 0.5) * (6 + s * 10)) * Math.max(1, Math.floor(DPR));
+    ctx.drawImage(fx.buf, 0, vy);
   }
 
   ctx.globalCompositeOperation = 'source-over';
   ctx.globalAlpha = 1;
 }
 
-// Draw helpers
+// Draw helpers (cached)
 function drawVignette() {
-  const vg = ctx.createRadialGradient(CW/2, CH/2, CH*0.1, CW/2, CH/2, CH*0.72);
-  vg.addColorStop(0, 'rgba(0,0,0,0)');
-  vg.addColorStop(1, 'rgba(0,0,0,0.38)');
-  ctx.fillStyle = vg;
-  ctx.fillRect(0, 0, CW, CH);
+  if (!vignetteCache) return;
+  ctx.drawImage(vignetteCache, 0, 0);
 }
 
 function drawPhosphorWarmth(ch) {
-  const { r, g, b } = ch;
-  const luma = (r*0.299 + g*0.587 + b*0.114) / 255;
-  const a  = 0.10 + luma * 0.14;
-  const pg = ctx.createRadialGradient(CW/2, CH/2, 0, CW/2, CH/2, CH*0.55);
-  pg.addColorStop(0, `rgba(255,255,255,${a})`);
-  pg.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = pg;
-  ctx.fillRect(0, 0, CW, CH);
+  const o = getWarmthOverlay(ch);
+  ctx.drawImage(o, 0, 0);
 }
 
 function drawScanBand() {
   scanOffset = (scanOffset + (0.35 * DPR)) % CH;
   ctx.fillStyle = 'rgba(255,255,255,0.02)';
-  for (let y = scanOffset % (80*DPR); y < CH; y += (80*DPR)) {
-    ctx.fillRect(0, y, CW, 2*DPR);
+  const step = (80 * DPR);
+  for (let y = scanOffset % step; y < CH; y += step) {
+    ctx.fillRect(0, y, CW, 2 * DPR);
   }
 }
 
 function drawStatic(alpha) {
   if (alpha <= 0.01) return;
-  if (!staticNoise || noiseAge++ > 3) {
-    staticNoise = makeNoiseBuffer();
-    noiseAge = 0;
+
+  // regenerate less often on low quality
+  const maxAge = quality < 0.8 ? 5 : 3;
+  if (noise.age++ > maxAge) {
+    regenNoise();
+    noise.age = 0;
   }
+
+  ctx.save();
   ctx.globalAlpha = alpha;
-  ctx.drawImage(staticNoise, 0, 0);
-  ctx.globalAlpha = 1;
+
+  // scale low-res noise up, disable smoothing for CRT vibe
+  const prev = ctx.imageSmoothingEnabled;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(noise.canvas, 0, 0, noise.canvas.width, noise.canvas.height, 0, 0, CW, CH);
+  ctx.imageSmoothingEnabled = prev;
+
+  ctx.restore();
 }
 
 function drawHauntOverlay(strength, spike) {
@@ -963,7 +1087,7 @@ function drawHauntOverlay(strength, spike) {
 
   ctx.restore();
 
-  const chance = 0.010 + s * 0.020 + spike * 0.050;
+  const chance = (0.010 + s * 0.020 + spike * 0.050) * quality;
   if (Math.random() < chance) {
     ctx.save();
     ctx.scale(DPR, DPR);
@@ -1002,7 +1126,7 @@ function maybeDrawMicroFrame() {
   if (now - lastMicroFrameAt < minGap) return;
   if (corruption < 0.58) return;
 
-  const p = 0.0028 + clamp01((corruption - 0.58) / 0.42) * 0.0060;
+  const p = (0.0028 + clamp01((corruption - 0.58) / 0.42) * 0.0060) * quality;
   if (Math.random() < p) {
     lastMicroFrameAt = now;
     microFrameUntil = now + (Math.random() < 0.25 ? 34 : 17);
@@ -1078,14 +1202,14 @@ function drawChannelLabel(ch, osdInput) {
 
   let labelText = `CH ${labelNum}${cursor}`;
 
-  if (corruption > 0.55 && Math.random() < (0.08 + corruption * 0.12)) {
+  if (corruption > 0.55 && Math.random() < (0.08 + corruption * 0.12) * quality) {
     labelText = labelText.replace(/0/g, 'O').replace(/1/g, 'I');
-    if (corruption > 0.82 && Math.random() < 0.25) {
+    if (corruption > 0.82 && Math.random() < 0.25 * quality) {
       labelText = labelText.replace(/6/g, (Math.random() < 0.5 ? '9' : 'G'));
     }
   }
 
-  if (corruption > 0.86 && Math.random() < 0.012) {
+  if (corruption > 0.86 && Math.random() < 0.012 * quality) {
     labelText = `CH 666${cursor}`;
   }
 
@@ -1136,7 +1260,6 @@ function drawVolumeOSD() {
   ctx.scale(DPR, DPR);
 
   const w = CW / DPR;
-  const h = CH / DPR;
   const fontSize = Math.floor(w * 0.055);
   const pad = Math.floor(fontSize * 0.35);
   const barW = Math.floor(fontSize * 0.38);
@@ -1153,7 +1276,7 @@ function drawVolumeOSD() {
   const boxH = Math.floor(fontSize * 1.05) + pad * 2;
 
   const x = w - boxW - Math.floor(w * 0.05);
-  const y = Math.floor(h * 0.10);
+  const y = Math.floor((CH / DPR) * 0.10);
 
   ctx.fillStyle = `rgba(0,0,0,${0.34 * alpha})`;
   ctx.beginPath();
@@ -1229,6 +1352,9 @@ function drawInfoText(ch) {
 
 // Main draw
 function drawChannel(ch) {
+  // reset fx buffer flag each frame
+  fx.bufReady = false;
+
   if (!tvOn) {
     ctx.fillStyle = '#060504';
     ctx.fillRect(0, 0, CW, CH);
@@ -1263,7 +1389,7 @@ function drawChannel(ch) {
   drawScanBand();
 
   glitchTimer++;
-  const glitchChance = 0.02 + distortionLevel * 0.02;
+  const glitchChance = (0.02 + distortionLevel * 0.02) * quality;
   if (glitchTimer > (140 - distortionLevel * 20) && Math.random() < glitchChance) {
     glitchTimer = 0;
     const gy = (Math.random() * CH) | 0;
@@ -1327,9 +1453,11 @@ function drawChannel(ch) {
   const vis = clamp01(base * 0.9 + spike * 0.95);
 
   if (vis > 0.01) {
-    applyShear(vis);
-    applyRgbSplit(vis);
-    applyFlicker(vis);
+    // FX are the heavy part, scale by quality
+    const fxVis = vis * (0.70 + 0.30 * quality);
+    applyShear(fxVis);
+    applyRgbSplit(fxVis);
+    applyFlicker(fxVis);
     drawHauntOverlay(base, spike);
   }
 
@@ -1354,6 +1482,8 @@ function switchTo(idx) {
 
   const ch = CHANNELS[currentIdx];
   setGlow(ch);
+
+  // rebuild warmth overlay lazily via cache key
   loadVideoForChannel(ch);
 
   staticBurst = 1.0;
@@ -1482,19 +1612,17 @@ function unlockSecretChannel() {
   staticBurst = 1.0;
 }
 
-// Watchdog: end and stall detection WITHOUT random skips
+// Watchdog
 function watchdogVideo(nowMs) {
   const ch = CHANNELS[currentIdx];
   if (!tvOn || !ch || ch.type !== 'video') return;
   if (switching) return;
 
-  // If ended flag true, go next
   if (videoEl.ended) {
     safeAutoNext('watchdog-ended');
     return;
   }
 
-  // If metadata never loads for too long, go next
   if (videoEl.readyState < 2) {
     if (nowMs - videoLoadStartedAt > 6500) {
       safeAutoNext('watchdog-no-decode');
@@ -1505,13 +1633,11 @@ function watchdogVideo(nowMs) {
   const dur = videoEl.duration || 0;
   const t = videoEl.currentTime || 0;
 
-  // If it is basically at the end and paused, go next (covers browsers that fail ended)
   if (dur > 0.5 && t >= dur - 0.08 && (videoEl.paused || videoEl.currentTime === videoLastTime)) {
     safeAutoNext('watchdog-near-end');
     return;
   }
 
-  // Stall detection: if no progress for 3.2s while not paused, go next
   if (!videoEl.paused) {
     const noProgressMs = nowMs - videoLastProgressAt;
     if (noProgressMs > 3200) {
@@ -1520,31 +1646,75 @@ function watchdogVideo(nowMs) {
     }
   }
 
-  // If buffering state persists for too long, go next
   if (videoStallSince && (nowMs - videoStallSince > 3600)) {
     safeAutoNext('watchdog-buffer-stuck');
     return;
   }
 }
 
+// Adaptive quality controller
+function updateQuality(frameMs) {
+  avgFrameMs = avgFrameMs * 0.92 + frameMs * 0.08;
+
+  const now = performance.now();
+  if (now - lastQualityAdjustAt < PERF.adjustCooldownMs) return;
+
+  if (avgFrameMs > PERF.slowMs && quality > 0.65) {
+    quality = Math.max(0.65, quality - 0.10);
+    lastQualityAdjustAt = now;
+    resizeCanvas();
+    return;
+  }
+
+  if (avgFrameMs < PERF.fastMs && quality < 1.0 && !isMobile) {
+    quality = Math.min(1.0, quality + 0.05);
+    lastQualityAdjustAt = now;
+    resizeCanvas();
+  }
+}
+
+// Pause rendering when tab hidden (mobile heat killer)
+let pausedByVisibility = false;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    pausedByVisibility = true;
+    try { videoEl.pause(); } catch {}
+  } else {
+    pausedByVisibility = false;
+    if (tvOn && CHANNELS[currentIdx] && CHANNELS[currentIdx].type === 'video') {
+      try { videoEl.play(); } catch {}
+    }
+    last = performance.now();
+  }
+});
+
 // Init
 setGlow(CHANNELS[currentIdx]);
+regenNoise();
+buildVignetteCache();
 loadVideoForChannel(CHANNELS[currentIdx]);
 setPowerState(true);
 
 let last = performance.now();
 function loop(now) {
-  const dt = Math.min(0.05, (now - last) / 1000);
+  if (pausedByVisibility) {
+    requestAnimationFrame(loop);
+    return;
+  }
+
+  const frameMs = now - last;
+  const dt = Math.min(0.05, frameMs / 1000);
   last = now;
 
   frameCount++;
+
+  updateQuality(frameMs);
 
   updateDistortion(dt);
   updateAutonomy(dt);
   tickPossessedTyping();
   endFreezeIfNeeded(now);
 
-  // decay scare flash
   if (scareHold > 0) scareHold -= dt;
   else scareFlash = scareFlash > 0.001 ? scareFlash * 0.78 : 0;
 
