@@ -4,6 +4,9 @@ Una televisione interattiva in stile **retro analogico** che trasmette clip, gli
 
 Il progetto è stato pensato come esperienza immersiva per live streaming e community: una TV virtuale che gli spettatori possono esplorare cambiando canale, scoprendo contenuti nascosti e interagendo con una modalità live.
 
+
+![Hero Section](1.png)
+
 ---
 
 ## Concept
