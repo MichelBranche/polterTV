@@ -1,0 +1,21 @@
+{
+  "name": "poltertv",
+  "version": "1.0.0",
+  "description": "Una televisione interattiva in stile retro analogico",
+  "main": "script.js",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static HTML project - no build needed'"
+  },
+  "keywords": [
+    "tv",
+    "retro",
+    "interactive",
+    "glitch"
+  ],
+  "author": "Michel Branche",
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
